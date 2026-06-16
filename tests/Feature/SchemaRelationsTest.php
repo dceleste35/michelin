@@ -7,6 +7,7 @@ use App\Models\UserTire;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 
 function makeProduct(array $overrides = []): Product
 {
@@ -77,9 +78,14 @@ it('constrains enum columns at the database level', function () {
     $user = User::factory()->create();
     $product = makeProduct();
 
-    expect(fn () => UserTire::create([
+    // Insert via the query builder to bypass the model enum cast and prove the
+    // database CHECK constraint itself rejects out-of-range values.
+    expect(fn () => DB::table('user_tires')->insert([
         'user_id' => $user->id,
         'product_id' => $product->id,
         'position' => 'SIDE', // not in FRONT|REAR
+        'is_active' => true,
+        'created_at' => now(),
+        'updated_at' => now(),
     ]))->toThrow(QueryException::class);
 });
