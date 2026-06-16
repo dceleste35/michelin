@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Enums\Surface;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
@@ -18,9 +20,9 @@ use Illuminate\Support\Carbon;
  * @property int $total_elevation_gain_m
  * @property int|null $average_watts
  * @property int|null $average_cadence
- * @property string|null $surface
+ * @property Surface|null $surface
  * @property Carbon $start_date
- * @property mixed $raw_json
+ * @property array<string, mixed>|null $raw_json
  */
 #[Fillable([
     'user_id',
@@ -39,6 +41,20 @@ use Illuminate\Support\Carbon;
 class StravaActivity extends Model
 {
     /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'surface' => Surface::class,
+            'raw_json' => 'array',
+            'start_date' => 'datetime',
+        ];
+    }
+
+    /**
      * The user who recorded this activity.
      *
      * @return BelongsTo<User, $this>
@@ -46,5 +62,15 @@ class StravaActivity extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Limit the query to activities from the last six months.
+     *
+     * @param  Builder<StravaActivity>  $query
+     */
+    public function scopeLastSixMonths(Builder $query): void
+    {
+        $query->where('start_date', '>=', now()->subMonths(6));
     }
 }

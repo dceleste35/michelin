@@ -20,7 +20,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $casing_tech
  * @property string|null $reinforcement_tech
  * @property string|null $ebike_tech
- * @property mixed $terrain_types
+ * @property array<int, string>|null $terrain_types
  * @property string|null $use
  * @property int|null $expected_life_km
  * @property string|null $rolling_resistance_watts
@@ -53,6 +53,18 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 ])]
 class Product extends Model
 {
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'terrain_types' => 'array',
+        ];
+    }
+
     /**
      * The tire mounts referencing this product.
      *

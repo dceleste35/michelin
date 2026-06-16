@@ -3,9 +3,12 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Enums\RidingStyle;
+use App\Enums\Segment;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -25,9 +28,9 @@ use Illuminate\Support\Str;
  * @property string|null $remember_token
  * @property string|null $strava_athlete_id
  * @property int|null $weight_kg
- * @property string|null $segment
+ * @property Segment|null $segment
  * @property bool $segment_overridden
- * @property string|null $riding_style
+ * @property RidingStyle|null $riding_style
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
@@ -48,6 +51,9 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'segment' => Segment::class,
+            'riding_style' => RidingStyle::class,
+            'segment_overridden' => 'boolean',
         ];
     }
 
@@ -69,6 +75,16 @@ class User extends Authenticatable
     public function tires(): HasMany
     {
         return $this->hasMany(UserTire::class);
+    }
+
+    /**
+     * Limit the query to users connected to Strava.
+     *
+     * @param  Builder<User>  $query
+     */
+    public function scopeWithStravaConnected(Builder $query): void
+    {
+        $query->whereNotNull('strava_athlete_id');
     }
 
     /**
