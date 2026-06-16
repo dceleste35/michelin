@@ -36,5 +36,6 @@ COPY . .
 # Set Server Name to bind Caddy to HTTP on port 80
 ENV SERVER_NAME=":80"
 
-# Expose port 80
+# Expose ports: 80 for FrankenPHP, 5173 for Vite
 EXPOSE 80
+EXPOSE 5173

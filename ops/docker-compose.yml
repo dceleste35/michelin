@@ -7,12 +7,13 @@ services:
     restart: unless-stopped
     ports:
       - "8000:80"
+      - "5173:5173"
     volumes:
       - ..:/var/www/html:delegated
       - /var/www/html/vendor
-      - ./.env.docker:/var/www/html/.env
+      - ./.env:/var/www/html/.env
     env_file:
-      - .env.docker
+      - .env
     depends_on:
       - db
     networks:
@@ -38,7 +39,7 @@ services:
     container_name: michelin-pgadmin
     restart: unless-stopped
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@michelin.local}
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@michelin.com}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-adminpassword}
     ports:
       - "5050:80"
