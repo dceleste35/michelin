@@ -33,6 +33,8 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Copy application files (optional, overridden by volumes in dev)
 COPY . .
 
+RUN composer install
+
 # Set Server Name to bind Caddy to HTTP on port 80
 ENV SERVER_NAME=":80"
 

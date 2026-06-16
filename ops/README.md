@@ -29,10 +29,14 @@ Générez la clé de chiffrement Laravel, installez les dépendances JavaScript 
 ```bash
 # Générer la clé d'application (s'écrira directement dans ops/.env)
 docker compose -f ops/docker-compose.yml exec app php artisan key:generate
+```
 
+```bash
 # Installer les dépendances JS (npm)
 docker compose -f ops/docker-compose.yml exec app npm install
+```
 
+```bash
 # Compiler les assets pour la production (Vite)
 docker compose -f ops/docker-compose.yml exec app npm run build
 ```
@@ -46,6 +50,14 @@ docker compose -f ops/docker-compose.yml exec app php artisan migrate
 Une fois les conteneurs démarrés :
 - **Application Web (Laravel + FrankenPHP)** : [http://localhost:8000](http://localhost:8000)
 - **pgAdmin (Gestion de base de données)** : [http://localhost:5050](http://localhost:5050)
+
+> ⚠️ **Note / Résolution d'erreur** : Si l'application web affiche une erreur de type `RuntimeException: No application encryption key has been specified` (Missing App Key Exception), cela signifie que la clé générée n'a pas encore été lue par FrankenPHP. Éteignez tous les conteneurs puis relancez-les pour recharger les variables d'environnement :
+> ```bash
+> docker compose -f ops/docker-compose.yml down
+> ```
+> ```bash
+> docker compose -f ops/docker-compose.yml up -d
+> ```
 
 ---
 
