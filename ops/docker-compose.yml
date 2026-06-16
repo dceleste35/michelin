@@ -10,8 +10,9 @@ services:
     volumes:
       - ..:/var/www/html:delegated
       - /var/www/html/vendor
+      - ./.env.docker:/var/www/html/.env
     env_file:
-      - ../.env
+      - .env.docker
     depends_on:
       - db
     networks:
