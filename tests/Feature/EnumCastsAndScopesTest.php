@@ -40,7 +40,7 @@ it('persists enum instances assigned directly', function () {
     expect(User::find($user->id)->segment)->toBe(Segment::Mtb);
 });
 
-it('casts strava activity surface to enum and raw_json to array', function () {
+it('casts strava activity surface_derived to enum and raw_json to array', function () {
     $user = User::factory()->create();
 
     $activity = StravaActivity::create([
@@ -51,12 +51,12 @@ it('casts strava activity surface to enum and raw_json to array', function () {
         'moving_time_s' => 19800,
         'average_speed_ms' => 7.69,
         'total_elevation_gain_m' => 1240,
-        'surface' => Surface::Mixed,
+        'surface_derived' => Surface::Mixed,
         'start_date' => now(),
         'raw_json' => ['id' => 1429876, 'athlete' => ['id' => 42]],
     ])->refresh();
 
-    expect($activity->surface)->toBe(Surface::Mixed)
+    expect($activity->surface_derived)->toBe(Surface::Mixed)
         ->and($activity->raw_json)->toBeArray()
         ->and($activity->raw_json['athlete']['id'])->toBe(42)
         ->and($activity->start_date)->toBeInstanceOf(CarbonInterface::class);
