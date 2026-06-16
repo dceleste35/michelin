@@ -23,3 +23,8 @@ yarn-error.log
 /.vscode
 /.zed
 tasks/todo.md
+
+# Proprietary product catalog source — never commit to the public repo
+*.xlsx
+*.xls
+/database/data/
