@@ -9,7 +9,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: 'Noto Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 
     --color-zinc-50: #fafafa;
     --color-zinc-100: #f5f5f5;
@@ -23,16 +23,34 @@
     --color-zinc-900: #171717;
     --color-zinc-950: #0a0a0a;
 
-    --color-accent: var(--color-neutral-800);
-    --color-accent-content: var(--color-neutral-800);
+    /* Michelin brand palette — official values (digital charter) */
+    --color-michelin-blue: #27509b;        /* Reference Blue — main "Group" action */
+    --color-michelin-blue-light: #87a4d0;  /* official blue tint — links/accents on dark */
+    --color-michelin-blue-dark: #00205b;   /* secondary Dark Blue */
+    --color-michelin-midnight: #000c34;    /* tertiary Midnight — immersive backgrounds */
+    --color-michelin-yellow: #fce500;      /* Highlighting Yellow — commercial CTA only */
+    --color-michelin-green: #84bd00;       /* secondary Green */
+    --color-michelin-purple: #582c83;      /* secondary Purple */
+    --color-michelin-gray: #53565a;        /* secondary Gray */
+
+    /* Functional / "special" colours (charter) */
+    --color-michelin-success: #2e7d32;
+    --color-michelin-warning: #f9a825;
+    --color-michelin-danger: #b71c1c;
+
+    /* Partner */
+    --color-strava: #fc4c02;
+
+    --color-accent: var(--color-michelin-blue);
+    --color-accent-content: var(--color-michelin-blue);
     --color-accent-foreground: var(--color-white);
 }
 
 @layer theme {
     .dark {
-        --color-accent: var(--color-white);
-        --color-accent-content: var(--color-white);
-        --color-accent-foreground: var(--color-neutral-800);
+        --color-accent: var(--color-michelin-blue);
+        --color-accent-content: var(--color-michelin-blue-light);
+        --color-accent-foreground: var(--color-white);
     }
 }
 
