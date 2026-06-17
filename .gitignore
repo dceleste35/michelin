@@ -23,6 +23,8 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+compose.yaml
+phpunit.xml
 tasks/todo.md
 
 # Proprietary product catalog source — never commit to the public repo
