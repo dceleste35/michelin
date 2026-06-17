@@ -49,7 +49,7 @@ it('confirms the smart default once and continues to the activities', function (
         ->call('confirm')
         ->assertRedirect(route('activities'));
 
-    expect($marc->refresh()->profile_confirmed_at)->not->toBeNull(); // recorded so onboarding is shown only once
+    expect($marc->refresh()->profile_confirmed_at)->not->toBeNull(); // enregistré pour que l'onboarding ne soit affiché qu'une seule fois
 });
 
 it('lets the rider override the segment via Adjust and flags it', function () {
@@ -75,7 +75,7 @@ it('keeps a user-overridden segment instead of re-inferring', function () {
 
     Livewire::test('pages::profile')->assertSee('a Road rider');
 
-    expect($marc->refresh()->segment)->toBe(Segment::Road); // not overwritten by inference
+    expect($marc->refresh()->segment)->toBe(Segment::Road); // non écrasé par l'inférence
 });
 
 it('updates the system weight from the slider', function () {

@@ -22,10 +22,10 @@ it('seeds the demo gravel pair with coherent ETRTO for the upsell', function () 
         ->and($powerGravel->tpi)->toBe(120)
         ->and($powerGravel->terrain_types)->toBeArray()
         ->and($powerGravel->terrain_types)->toContain('OFFROAD MIXED')
-        // Same wheel diameter (622) → Power Gravel RS is a coherent upsell.
+        // Même diamètre de roue (622) → le Power Gravel RS est une montée en gamme cohérente.
         ->and($powerGravelRs->diameter_etrto)->toBe($powerGravel->diameter_etrto)
         ->and($powerGravelRs->diameter_etrto)->toBe(622)
-        // RS is the lighter, faster race option.
+        // Le RS est l'option course, plus légère et plus rapide.
         ->and($powerGravelRs->weight_g)->toBeLessThan($powerGravel->weight_g)
         ->and((float) $powerGravelRs->rolling_resistance_watts)
         ->toBeLessThan((float) $powerGravel->rolling_resistance_watts);

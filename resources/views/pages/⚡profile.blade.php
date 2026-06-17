@@ -22,8 +22,8 @@ new #[Title('Rider profile')] class extends Component
     public bool $adjusting = false;
 
     /**
-     * Infer + persist the profile (respects a user override), then load the
-     * effective persisted values to display as a correctable smart default.
+     * Déduit puis persiste le profil (en respectant une correction de l'utilisateur), puis charge
+     * les valeurs persistées effectives afin de les afficher comme valeur par défaut intelligente et corrigeable.
      */
     public function mount(ProfileInferenceService $service): void
     {
@@ -38,7 +38,7 @@ new #[Title('Rider profile')] class extends Component
     }
 
     /**
-     * Human labels for each segment (translatable).
+     * Libellés lisibles pour chaque segment (traduisibles).
      *
      * @return array<string, string>
      */
@@ -54,7 +54,7 @@ new #[Title('Rider profile')] class extends Component
     }
 
     /**
-     * Reveal the segment selector.
+     * Affiche le sélecteur de segment.
      */
     public function adjust(): void
     {
@@ -62,7 +62,7 @@ new #[Title('Rider profile')] class extends Component
     }
 
     /**
-     * Persist a manual segment correction and flag the override.
+     * Persiste une correction manuelle du segment et signale la surcharge.
      */
     public function updatedSegment(string $value): void
     {
@@ -75,7 +75,7 @@ new #[Title('Rider profile')] class extends Component
     }
 
     /**
-     * Persist the system weight from the slider.
+     * Persiste le poids du système depuis le curseur.
      */
     public function updatedWeightKg(int $value): void
     {
@@ -85,7 +85,7 @@ new #[Title('Rider profile')] class extends Component
     }
 
     /**
-     * Accept the smart default (recorded once) and continue to the activities.
+     * Accepte la valeur par défaut intelligente (enregistrée une seule fois) et passe aux activités.
      */
     public function confirm()
     {

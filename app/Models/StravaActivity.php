@@ -48,7 +48,7 @@ class StravaActivity extends Model
     use HasFactory;
 
     /**
-     * Get the attributes that should be cast.
+     * Récupère les attributs qui doivent être castés.
      *
      * @return array<string, string>
      */
@@ -62,7 +62,7 @@ class StravaActivity extends Model
     }
 
     /**
-     * The user who recorded this activity.
+     * L'utilisateur qui a enregistré cette activité.
      *
      * @return BelongsTo<User, $this>
      */
@@ -72,7 +72,7 @@ class StravaActivity extends Model
     }
 
     /**
-     * Limit the query to activities from the last six months.
+     * Limite la requête aux activités des six derniers mois.
      *
      * @param  Builder<StravaActivity>  $query
      */

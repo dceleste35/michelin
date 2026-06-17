@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 class StravaActivityFactory extends Factory
 {
     /**
-     * Define the model's default state (a realistic gravel ride).
+     * Définit l'état par défaut du modèle (une sortie gravel réaliste).
      *
      * @return array<string, mixed>
      */
@@ -26,7 +26,7 @@ class StravaActivityFactory extends Factory
 
         $attributes = [
             'user_id' => User::factory(),
-            // Strava activity ids are 64-bit integers (~11 digits today).
+            // Les identifiants d'activité Strava sont des entiers 64 bits (~11 chiffres aujourd'hui).
             'external_id' => (string) (15_000_000_000 + fake()->unique()->numberBetween(1, 1_000_000_000)),
             'gear_id' => 'b'.fake()->numberBetween(1_000_000, 9_999_999),
             'sport_type' => 'GravelRide',
@@ -40,8 +40,8 @@ class StravaActivityFactory extends Factory
             'start_date' => CarbonImmutable::now()->subDays(fake()->numberBetween(0, 180))->setTime(7, 30),
         ];
 
-        // raw_json mirrors the final attributes in Strava API shape (closure so it
-        // reflects any state overrides applied to the columns above).
+        // raw_json reflète les attributs finaux au format de l'API Strava (closure afin
+        // de prendre en compte toute surcharge d'état appliquée aux colonnes ci-dessus).
         $attributes['raw_json'] = fn (array $attrs): array => self::stravaPayload(
             $attrs,
             fake()->numberBetween(1, 99_999),
@@ -51,15 +51,15 @@ class StravaActivityFactory extends Factory
     }
 
     /**
-     * Build a faithful Strava DetailedActivity payload from the model attributes.
+     * Construit un payload Strava DetailedActivity fidèle à partir des attributs du modèle.
      *
-     * Field names, units and types mirror the public Strava API
-     * (developers.strava.com): distance/elevation in meters, times in seconds,
-     * speeds in m/s, watts in watts, cadence in rpm, dates ISO-8601. The only
-     * non-Strava key is `_derived`, which namespaces values we compute ourselves
-     * (Strava exposes no per-activity surface). Some illustrative fields (map
-     * polyline, heart rate, gear odometer) are derived deterministically so the
-     * mock stays reproducible while resembling a real response.
+     * Les noms de champs, unités et types reproduisent l'API publique Strava
+     * (developers.strava.com) : distance/dénivelé en mètres, durées en secondes,
+     * vitesses en m/s, watts en watts, cadence en tr/min, dates en ISO-8601. La seule
+     * clé non-Strava est `_derived`, qui regroupe les valeurs que nous calculons nous-mêmes
+     * (Strava n'expose aucune surface par activité). Certains champs illustratifs (polyline
+     * de carte, fréquence cardiaque, compteur kilométrique du vélo) sont dérivés de manière
+     * déterministe afin que le mock reste reproductible tout en ressemblant à une vraie réponse.
      *
      * @param  array<string, mixed>  $attrs
      * @return array<string, mixed>
@@ -80,7 +80,7 @@ class StravaActivityFactory extends Factory
         $gearId = isset($attrs['gear_id']) && is_string($attrs['gear_id']) ? $attrs['gear_id'] : null;
 
         $hasPower = $avgWatts !== null;
-        $elapsedTime = (int) round($movingTime * 1.12); // ~12 % coffee-stop overhead
+        $elapsedTime = (int) round($movingTime * 1.12); // ~12 % de marge pour les pauses café
         $hour = (int) $start->format('G');
         $dayPart = match (true) {
             $hour < 12 => 'Morning',
@@ -145,18 +145,18 @@ class StravaActivityFactory extends Factory
     }
 
     /**
-     * Build a Strava SummaryGear (bike) payload. Strava exposes the bike via
-     * `gear_id`/`gear` and its lifetime `distance` (odometer) — but no per-tire
-     * or component data. Tire wear is therefore attributed in our own domain
-     * (UserTire) from this odometer. The odometer is derived deterministically
-     * from the gear id so it stays stable across a rider's activities.
+     * Construit un payload Strava SummaryGear (vélo). Strava expose le vélo via
+     * `gear_id`/`gear` et sa `distance` totale (compteur kilométrique) — mais aucune
+     * donnée par pneu ou par composant. L'usure des pneus est donc attribuée dans notre
+     * propre domaine (UserTire) à partir de ce compteur. Le compteur est dérivé de manière
+     * déterministe à partir du gear id afin de rester stable d'une activité à l'autre.
      *
      * @return array<string, mixed>
      */
     private static function gearPayload(string $gearId): array
     {
         $digits = (int) (preg_replace('/\D/', '', $gearId) ?? '');
-        $odometerKm = 2_500 + ($digits % 6_000); // 2 500–8 499 km lifetime
+        $odometerKm = 2_500 + ($digits % 6_000); // 2 500–8 499 km au total
 
         return [
             'id' => $gearId,
@@ -174,7 +174,7 @@ class StravaActivityFactory extends Factory
     }
 
     /**
-     * An illustrative Google-encoded polyline (not a real GPS trace).
+     * Une polyline encodée au format Google à titre d'illustration (pas une vraie trace GPS).
      */
     private static function fakePolyline(): string
     {

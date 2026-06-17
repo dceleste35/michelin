@@ -8,7 +8,7 @@ use Illuminate\Validation\Rules\Password;
 it('applies strict password defaults in production', function () {
     app()->detectEnvironment(fn () => 'production');
 
-    // Invoking the default callback runs the production branch of AppServiceProvider.
+    // L'appel du callback par défaut exécute la branche production d'AppServiceProvider.
     $rule = Password::default();
 
     expect($rule)->toBeInstanceOf(Password::class);
@@ -17,7 +17,7 @@ it('applies strict password defaults in production', function () {
 it('falls back to no enforced password rule outside production', function () {
     app()->detectEnvironment(fn () => 'testing');
 
-    // Closure returns null in non-production → Password::default() falls back to min(8).
+    // La closure renvoie null hors production → Password::default() retombe sur min(8).
     $rule = Password::default();
 
     expect($rule)->toBeInstanceOf(Password::class);

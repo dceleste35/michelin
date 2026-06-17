@@ -4,21 +4,22 @@ namespace Database\Seeders;
 
 use App\Enums\RidingStyle;
 use App\Enums\Segment;
-use App\Enums\Surface;
 use App\Enums\TirePosition;
 use App\Models\Product;
 use App\Models\StravaActivity;
 use App\Models\User;
 use App\Models\UserTire;
+use App\Services\ProfileInferenceService;
 use Carbon\CarbonImmutable;
 use Database\Factories\StravaActivityFactory;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 /**
- * Hero persona: Marc (GRAVEL). ~80 GravelRide activities over 6 months, 60/40
- * asphalt/off-road, riding a worn Power Gravel (rear 86 %). Fully deterministic
- * so `demo:reset` reproduces the exact demo state. Requires ProductCatalogSeeder.
+ * Persona vedette : Marc (GRAVEL). ~80 activités GravelRide sur 6 mois, 60/40
+ * asphalte/tout-terrain, roulant sur un Power Gravel usé (arrière 86 %). Entièrement
+ * déterministe afin que `demo:reset` reproduise exactement l'état de la démo.
+ * Nécessite ProductCatalogSeeder.
  */
 class MarcSeeder extends Seeder
 {
@@ -28,7 +29,7 @@ class MarcSeeder extends Seeder
 
     private const ACTIVITY_BASE_ID = 15_000_000_000;
 
-    private const GEAR_ID = 'b9100042'; // Marc's single gravel bike (Strava gear id)
+    private const GEAR_ID = 'b9100042'; // L'unique vélo gravel de Marc (gear id Strava)
 
     public function run(): void
     {
@@ -52,19 +53,22 @@ class MarcSeeder extends Seeder
     private function seedActivities(User $marc): void
     {
         $now = CarbonImmutable::now();
+        $inference = app(ProfileInferenceService::class);
 
         for ($i = 0; $i < self::ACTIVITY_COUNT; $i++) {
-            // 60 % asphalt / 40 % off-road (hard-packed + mixed) — gravel rider.
-            $surface = match ($i % 5) {
-                0, 1, 2 => Surface::Asphalt,
-                3 => Surface::Hardpacked,
-                default => Surface::Mixed,
+            // Profil de grimpe réaliste par sortie (m/km). À l'allure régulière de 26 km/h de Marc, ces
+            // signaux SE DÉRIVENT en ~60 % asphalte / 20 % chemin damé / 20 % mixte — la surface
+            // est calculée par deriveSurface(), jamais codée en dur (crédibilité auprès du jury).
+            $elevationPerKm = match ($i % 5) {
+                0, 1, 2 => 5,   // plat & rapide → asphalte (gravel à allure route)
+                3 => 11,        // vallonné → chemin damé
+                default => 18,  // accidenté → mixte
             };
 
-            // A long ride (~150 km) every 12th outing, otherwise 35–75 km.
+            // Une longue sortie (~150 km) toutes les 12 sorties, sinon 35–75 km.
             $distanceKm = $i % 12 === 0 ? 150 : 35 + ($i * 7 % 41);
             $distanceM = $distanceKm * 1000;
-            $avgSpeedMs = 7.2; // ~26 km/h, steady endurance pace
+            $avgSpeedMs = 7.2; // ~26 km/h, allure d'endurance régulière
             $externalId = (string) (self::ACTIVITY_BASE_ID + $i);
 
             $attributes = [
@@ -74,12 +78,14 @@ class MarcSeeder extends Seeder
                 'distance_m' => $distanceM,
                 'moving_time_s' => (int) round($distanceM / $avgSpeedMs),
                 'average_speed_ms' => $avgSpeedMs,
-                'total_elevation_gain_m' => $distanceKm * ($surface === Surface::Asphalt ? 8 : 14),
+                'total_elevation_gain_m' => $distanceKm * $elevationPerKm,
                 'average_watts' => 178,
                 'average_cadence' => 84,
-                'surface_derived' => $surface,
                 'start_date' => $now->subDays((int) round($i * 180 / self::ACTIVITY_COUNT))->setTime(7, 30),
             ];
+
+            // La surface est DÉRIVÉE des signaux de la sortie via les règles documentées.
+            $attributes['surface_derived'] = $inference->deriveSurface(new StravaActivity($attributes));
             $attributes['raw_json'] = StravaActivityFactory::stravaPayload($attributes, self::ATHLETE_ID);
 
             StravaActivity::updateOrCreate(
@@ -94,7 +100,7 @@ class MarcSeeder extends Seeder
         $powerGravel = Product::where('web_range_name', 'Power Gravel')->sole();
         $mountedAt = CarbonImmutable::now()->subDays(180)->toDateString();
 
-        // Rear wears faster → 86 % (triggers the demo alert); front trails at 72 %.
+        // L'arrière s'use plus vite → 86 % (déclenche l'alerte de la démo) ; l'avant suit à 72 %.
         foreach ([[TirePosition::Rear, 86.0], [TirePosition::Front, 72.0]] as [$position, $wear]) {
             UserTire::updateOrCreate(
                 ['user_id' => $marc->id, 'product_id' => $powerGravel->id, 'position' => $position],

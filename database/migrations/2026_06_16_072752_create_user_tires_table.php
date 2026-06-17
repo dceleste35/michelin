@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Exécute les migrations.
      */
     public function up(): void
     {
@@ -24,12 +24,12 @@ return new class extends Migration
             $table->timestamps();
 
             $table->index(['user_id', 'is_active']);
-            $table->index('product_id'); // FK lookups (Product → mounted tires)
+            $table->index('product_id'); // Recherches par clé étrangère (Product → pneus montés)
         });
     }
 
     /**
-     * Reverse the migrations.
+     * Annule les migrations.
      */
     public function down(): void
     {

@@ -32,7 +32,7 @@ it('provides a representative Marc mock for parallel dev (60/40 gravel)', functi
         ->and($marc->ridingStyle)->toBe(RidingStyle::Endurance)
         ->and($marc->weightKg)->toBe(90)
         ->and(array_sum($marc->terrainPct))->toBe(100)
-        ->and($marc->terrainPct['asphalt'])->toBe(60); // 60 % asphalt / 40 % off-road
+        ->and($marc->terrainPct['asphalt'])->toBe(60); // 60 % asphalte / 40 % tout-terrain
 });
 
 it('builds the profile from a user with inferred fields persisted', function () {
@@ -50,7 +50,7 @@ it('builds the profile from a user with inferred fields persisted', function () 
 });
 
 it('falls back to gravel/90kg defaults for a not-yet-inferred user', function () {
-    $user = User::factory()->create(); // no segment / weight / style yet
+    $user = User::factory()->create(); // pas encore de segment / poids / style
 
     $profile = app(ProfileInferenceService::class)->buildProfile($user);
 

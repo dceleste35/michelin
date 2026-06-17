@@ -29,11 +29,11 @@ it('lists the rider activities with date, type, distance, elevation and surface'
     $this->actingAs($user);
 
     Livewire::test('pages::activities')
-        ->assertSee('15 Mar 2026')    // localised date (en test locale)
-        ->assertSee('Gravel Ride')    // humanised, translatable type
-        ->assertSee('42.2 km')        // Number::format, en test locale
-        ->assertSee('1,234 m')        // Number::format, en test locale
-        ->assertSee('Mixed');         // surface badge, translatable
+        ->assertSee('15 Mar 2026')    // date localisée (locale de test en)
+        ->assertSee('Gravel Ride')    // type humanisé et traduisible
+        ->assertSee('42.2 km')        // Number::format, locale de test en
+        ->assertSee('1,234 m')        // Number::format, locale de test en
+        ->assertSee('Mixed');         // badge de surface, traduisible
 });
 
 it('only shows the authenticated rider own activities', function () {
@@ -57,7 +57,7 @@ it('shows an empty state when the rider has no activities', function () {
         ->assertSee('No activities yet')
         ->assertSee('0 rides imported from Strava')
         ->assertSee('Connect with Strava')
-        ->assertSee(route('strava.connect'), false) // empty-state CTA links to the simulated connect
+        ->assertSee(route('strava.connect'), false) // le CTA de l'état vide pointe vers la connexion simulée
         ->assertDontSee('activities-table');
 });
 
@@ -71,7 +71,7 @@ it('paginates activities at 20 per page, most recent first', function () {
         ]);
     }
 
-    // Oldest ride — must land on page 2 with a unique elevation marker.
+    // Sortie la plus ancienne — doit se retrouver en page 2 avec un marqueur de dénivelé unique.
     StravaActivity::factory()->for($user)->create([
         'total_elevation_gain_m' => 9999,
         'start_date' => CarbonImmutable::now()->subDays(365),
@@ -81,7 +81,7 @@ it('paginates activities at 20 per page, most recent first', function () {
 
     Livewire::test('pages::activities')
         ->assertSee('21 rides imported from Strava')
-        ->assertDontSee('9,999 m')           // hidden on page 1
+        ->assertDontSee('9,999 m')           // masqué en page 1
         ->call('gotoPage', 2)
-        ->assertSee('9,999 m');              // visible on page 2
+        ->assertSee('9,999 m');              // visible en page 2
 });

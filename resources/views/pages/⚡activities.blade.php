@@ -14,7 +14,7 @@ new #[Title('Activities')] class extends Component
     use WithPagination;
 
     /**
-     * The authenticated rider's Strava activities, most recent first.
+     * Les activités Strava du cycliste authentifié, les plus récentes en premier.
      *
      * @return LengthAwarePaginator<int, \App\Models\StravaActivity>
      */

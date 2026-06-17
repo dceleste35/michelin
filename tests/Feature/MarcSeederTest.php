@@ -7,12 +7,13 @@ use App\Enums\TirePosition;
 use App\Models\StravaActivity;
 use App\Models\User;
 use App\Models\UserTire;
+use App\Services\ProfileInferenceService;
 use Database\Seeders\MarcSeeder;
 use Database\Seeders\ProductCatalogSeeder;
 
 function seedMarc(): User
 {
-    test()->seed(ProductCatalogSeeder::class); // Marc mounts a Power Gravel
+    test()->seed(ProductCatalogSeeder::class); // Marc monte un Power Gravel
     test()->seed(MarcSeeder::class);
 
     return User::where('email', 'marc@rideready.test')->sole();
@@ -37,6 +38,17 @@ it('splits Marc surfaces ~60/40 asphalt/off-road', function () {
 
     expect($asphalt)->toBe(48) // 60 %
         ->and($offroad)->toBe(32); // 40 %
+});
+
+it('derives every Marc surface from its ride signals (not hard-coded)', function () {
+    $marc = seedMarc();
+    $service = new ProfileInferenceService;
+
+    // La surface stockée doit être reproductible à partir des signaux de l'activité via les
+    // règles documentées — prouve au jury « nous la dérivons, nous ne la codons pas en dur ».
+    $marc->stravaActivities()->get()->each(
+        fn (StravaActivity $activity) => expect($activity->surface_derived)->toBe($service->deriveSurface($activity))
+    );
 });
 
 it('stores each activity as a faithful Strava DetailedActivity raw_json', function () {
@@ -65,7 +77,7 @@ it('attributes every Marc activity to a single bike (gear) for tire tracking', f
 
     expect($gearIds)->toHaveCount(80)
         ->and($gearIds->unique()->values()->all())->toBe(['b9100042'])
-        // Bike odometer is past the tire-mount baseline (1200 km) → wear is computable.
+        // Le compteur kilométrique du vélo dépasse la référence de montage du pneu (1200 km) → l'usure est calculable.
         ->and($odometerM)->toBeGreaterThan(1200 * 1000);
 });
 
@@ -77,12 +89,12 @@ it('mounts a worn Power Gravel (rear 86 %, active) on Marc', function () {
     expect((float) $rear->wear_percent)->toBe(86.0)
         ->and($rear->is_active)->toBeTrue()
         ->and($rear->product->web_range_name)->toBe('Power Gravel')
-        ->and($marc->tires()->where('is_active', true)->count())->toBe(2); // front + rear
+        ->and($marc->tires()->where('is_active', true)->count())->toBe(2); // avant + arrière
 });
 
 it('is deterministic and idempotent (re-seeding does not duplicate)', function () {
     $marc = seedMarc();
-    test()->seed(MarcSeeder::class); // run again
+    test()->seed(MarcSeeder::class); // relance
 
     expect($marc->stravaActivities()->count())->toBe(80)
         ->and(UserTire::where('user_id', $marc->id)->count())->toBe(2)

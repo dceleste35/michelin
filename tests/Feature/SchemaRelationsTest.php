@@ -78,12 +78,12 @@ it('constrains enum columns at the database level', function () {
     $user = User::factory()->create();
     $product = makeProduct();
 
-    // Insert via the query builder to bypass the model enum cast and prove the
-    // database CHECK constraint itself rejects out-of-range values.
+    // Insertion via le query builder pour contourner le cast enum du modèle et prouver que
+    // la contrainte CHECK de la base de données rejette elle-même les valeurs hors plage.
     expect(fn () => DB::table('user_tires')->insert([
         'user_id' => $user->id,
         'product_id' => $product->id,
-        'position' => 'SIDE', // not in FRONT|REAR
+        'position' => 'SIDE', // pas dans FRONT|REAR
         'is_active' => true,
         'created_at' => now(),
         'updated_at' => now(),

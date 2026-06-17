@@ -13,7 +13,7 @@ beforeEach(function () {
     $this->service = new ProfileInferenceService;
 });
 
-/** Build an in-memory (unsaved) activity for pure-rule tests. */
+/** Construit une activité en mémoire (non enregistrée) pour les tests de règles pures. */
 function rideAttrs(array $attrs = []): StravaActivity
 {
     return new StravaActivity(array_merge([
@@ -28,14 +28,14 @@ function rideAttrs(array $attrs = []): StravaActivity
 }
 
 // ---------------------------------------------------------------------------
-// deriveSurface — documented credibility rules
+// deriveSurface — règles de crédibilité documentées
 // ---------------------------------------------------------------------------
 
 it('derives surface from Strava signals', function (array $attrs, Surface $expected) {
     expect($this->service->deriveSurface(rideAttrs($attrs)))->toBe($expected);
 })->with([
     'flat road Ride → asphalt' => [['sport_type' => 'Ride', 'distance_m' => 50_000, 'total_elevation_gain_m' => 300], Surface::Asphalt],
-    'hilly Ride → hardpacked' => [['sport_type' => 'Ride', 'distance_m' => 50_000, 'total_elevation_gain_m' => 600], Surface::Hardpacked],
+    'hilly Ride → asphalt (road bike is paved)' => [['sport_type' => 'Ride', 'distance_m' => 50_000, 'total_elevation_gain_m' => 600], Surface::Asphalt],
     'virtual ride → asphalt' => [['sport_type' => 'VirtualRide', 'distance_m' => 40_000, 'total_elevation_gain_m' => 100], Surface::Asphalt],
     'flat fast gravel → asphalt' => [['sport_type' => 'GravelRide', 'distance_m' => 60_000, 'total_elevation_gain_m' => 300, 'average_speed_ms' => 7.5], Surface::Asphalt],
     'rolling gravel → hardpacked' => [['sport_type' => 'GravelRide', 'distance_m' => 50_000, 'total_elevation_gain_m' => 500, 'average_speed_ms' => 6.0], Surface::Hardpacked],
@@ -46,6 +46,16 @@ it('derives surface from Strava signals', function (array $attrs, Surface $expec
     'very steep MTB → mud' => [['sport_type' => 'EMountainBikeRide', 'distance_m' => 20_000, 'total_elevation_gain_m' => 800, 'average_speed_ms' => 4.0], Surface::Mud],
     'ebike → asphalt' => [['sport_type' => 'EBikeRide', 'distance_m' => 20_000, 'total_elevation_gain_m' => 300], Surface::Asphalt],
     'unknown sport → mixed' => [['sport_type' => 'Kayaking', 'distance_m' => 10_000, 'total_elevation_gain_m' => 0], Surface::Mixed],
+]);
+
+it('derives a surface without crashing on edge cases', function (array $attrs) {
+    expect($this->service->deriveSurface(rideAttrs($attrs)))->toBeInstanceOf(Surface::class);
+})->with([
+    'zero distance' => [['distance_m' => 0, 'total_elevation_gain_m' => 0]],
+    'zero speed' => [['average_speed_ms' => 0]],
+    'unknown sport type' => [['sport_type' => 'Run']],
+    'empty sport type' => [['sport_type' => '']],
+    'extreme elevation MTB' => [['sport_type' => 'MountainBikeRide', 'distance_m' => 10_000, 'total_elevation_gain_m' => 5_000]],
 ]);
 
 // ---------------------------------------------------------------------------
@@ -72,7 +82,7 @@ it('infers MTB when off-road share exceeds 70%', function () {
         rideAttrs(['surface_derived' => Surface::Soft]),
         rideAttrs(['surface_derived' => Surface::Mud]),
         rideAttrs(['surface_derived' => Surface::Asphalt]),
-    ]); // 3/4 = 75 % off-road
+    ]); // 3/4 = 75 % hors route
 
     expect($this->service->inferSegment($activities))->toBe(Segment::Mtb);
 });
@@ -83,18 +93,18 @@ it('infers GRAVEL for a mixed 15–70% off-road share', function () {
         rideAttrs(['surface_derived' => Surface::Asphalt]),
         rideAttrs(['surface_derived' => Surface::Hardpacked]),
         rideAttrs(['surface_derived' => Surface::Mixed]),
-    ]); // 2/4 = 50 % off-road
+    ]); // 2/4 = 50 % hors route
 
     expect($this->service->inferSegment($activities))->toBe(Segment::Gravel);
 });
 
 it('infers ROAD for an asphalt-dominant rider (deriving surface on the fly)', function () {
-    // surface_derived null → service derives it from the flat road rides.
+    // surface_derived null → le service la déduit à partir des sorties sur route plate.
     $activities = collect([
         rideAttrs(['sport_type' => 'Ride', 'total_elevation_gain_m' => 200, 'surface_derived' => null]),
         rideAttrs(['sport_type' => 'Ride', 'total_elevation_gain_m' => 150, 'surface_derived' => null]),
         rideAttrs(['sport_type' => 'Ride', 'total_elevation_gain_m' => 250, 'surface_derived' => null]),
-    ]); // all asphalt → 0 % off-road
+    ]); // tout en asphalte → 0 % hors route
 
     expect($this->service->inferSegment($activities))->toBe(Segment::Road);
 });
@@ -127,7 +137,7 @@ it('infers AGGRESSIF on high pace variability', function () {
         rideAttrs(['average_watts' => 150, 'average_speed_ms' => 5.0]),
         rideAttrs(['average_watts' => 150, 'average_speed_ms' => 11.0]),
         rideAttrs(['average_watts' => 150, 'average_speed_ms' => 5.0]),
-    ]); // low W/kg but ~10 km/h spread → high std dev
+    ]); // faible W/kg mais ~10 km/h d'écart → écart-type élevé
 
     expect($this->service->inferRidingStyle($activities, 90))->toBe(RidingStyle::Aggressif);
 });
@@ -163,7 +173,7 @@ it('computes terrain percentages per surface', function () {
 });
 
 // ---------------------------------------------------------------------------
-// infer + inferAndPersist (DB-backed)
+// infer + inferAndPersist (avec base de données)
 // ---------------------------------------------------------------------------
 
 it('infers Marc as a GRAVEL endurance rider with ~60/40 terrain', function () {
@@ -182,7 +192,7 @@ it('infers Marc as a GRAVEL endurance rider with ~60/40 terrain', function () {
 
 it('persists inferred fields and overrides a wrong persisted segment', function () {
     $user = User::factory()->create([
-        'segment' => 'ROAD',          // wrong on purpose
+        'segment' => 'ROAD',          // volontairement erroné
         'weight_kg' => null,
         'segment_overridden' => false,
     ]);
@@ -196,20 +206,20 @@ it('persists inferred fields and overrides a wrong persisted segment', function 
     $profile = $this->service->inferAndPersist($user->fresh());
 
     expect($profile->segment)->toBe(Segment::Gravel)
-        ->and($user->fresh()->segment)->toBe(Segment::Gravel)   // ROAD overwritten
-        ->and($user->fresh()->weight_kg)->toBe(90);             // default applied
+        ->and($user->fresh()->segment)->toBe(Segment::Gravel)   // ROAD écrasé
+        ->and($user->fresh()->weight_kg)->toBe(90);             // valeur par défaut appliquée
 });
 
 it('preserves a user-overridden segment', function () {
     $user = User::factory()->create([
         'segment' => 'ROAD',
-        'segment_overridden' => true, // user chose it manually
+        'segment_overridden' => true, // l'utilisateur l'a choisi manuellement
     ]);
     StravaActivity::factory()->count(3)->for($user)->create([
-        'surface_derived' => Surface::Mixed, // would infer GRAVEL/MTB
+        'surface_derived' => Surface::Mixed, // déduirait GRAVEL/MTB
     ]);
 
     $this->service->inferAndPersist($user->fresh());
 
-    expect($user->fresh()->segment)->toBe(Segment::Road); // untouched
+    expect($user->fresh()->segment)->toBe(Segment::Road); // inchangé
 });

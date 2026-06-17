@@ -3,8 +3,8 @@
 use Illuminate\Support\Facades\DB;
 
 it('runs all migrations cleanly on the test connection', function () {
-    // RefreshDatabase has already migrated; the pgvector migration must be a
-    // no-op on non-pgsql drivers so the suite stays green on sqlite.
+    // RefreshDatabase a déjà migré ; la migration pgvector doit être
+    // sans effet sur les pilotes non pgsql afin que la suite reste verte sur sqlite.
     expect(DB::getSchemaBuilder()->hasTable('migrations'))->toBeTrue();
 });
 
@@ -13,7 +13,7 @@ it('configures a postgres connection for local + cloud', function () {
 
     expect($pgsql['driver'])->toBe('pgsql')
         ->and((string) $pgsql['port'])->toBe('5432')
-        ->and($pgsql)->toHaveKey('url'); // env-driven → Laravel Cloud compatible
+        ->and($pgsql)->toHaveKey('url'); // piloté par l'environnement → compatible Laravel Cloud
 });
 
 it('wires the external service credentials for strava, anthropic and embeddings', function () {

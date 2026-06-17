@@ -10,19 +10,21 @@ use Illuminate\Support\Facades\Auth;
 class StravaController extends Controller
 {
     /**
-     * Seeded hero profile the simulated connection signs in as.
+     * Profil héros initialisé sous lequel la connexion simulée s'authentifie.
      */
     private const DEMO_EMAIL = 'marc@rideready.test';
 
     /**
-     * Simulated "Connect with Strava" (prototype).
+     * « Connect with Strava » simulé (prototype).
      *
-     * We do NOT call Strava: real accounts have no usable ride history, so the
-     * connection is faked — we sign in as the seeded hero (Marc) whose
-     * representative mock rides are what the app analyses, and show a short
-     * Strava-style interstitial. First connection lands on the smart-default
-     * onboarding; once the profile is confirmed, later connections skip straight
-     * to the activities (the profile stays editable from the sidebar).
+     * Nous n'appelons PAS Strava : les comptes réels n'ont pas d'historique de
+     * sorties exploitable, la connexion est donc factice — nous nous
+     * authentifions sous le héros initialisé (Marc), dont les sorties fictives
+     * représentatives sont celles que l'application analyse, et nous affichons
+     * un court écran intermédiaire façon Strava. La première connexion mène à
+     * l'onboarding aux valeurs par défaut intelligentes ; une fois le profil
+     * confirmé, les connexions suivantes accèdent directement aux activités (le
+     * profil reste modifiable depuis la barre latérale).
      */
     public function connect(): View|RedirectResponse
     {

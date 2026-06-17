@@ -28,14 +28,14 @@ it('uses Strava-native units and types', function () {
         'average_watts' => 200,
     ])->raw_json;
 
-    expect($payload['moving_time'])->toBeInt()                                  // seconds
+    expect($payload['moving_time'])->toBeInt()                                  // secondes
         ->and($payload['average_speed'])->toBeFloat()                            // m/s
         ->and($payload['max_speed'])->toBeGreaterThan($payload['average_speed'])
         ->and($payload['elapsed_time'])->toBeGreaterThanOrEqual($payload['moving_time'])
         ->and($payload['device_watts'])->toBeBool()
         ->and($payload['kilojoules'])->toBeGreaterThan(0)                       // kJ
         ->and($payload['average_watts'])->toEqual(200)                          // watts
-        ->and($payload['sport_type'])->toBe('GravelRide')                       // real enum value
+        ->and($payload['sport_type'])->toBe('GravelRide')                       // vraie valeur d'enum
         ->and($payload['start_date'])->toEndWith('Z');                          // ISO-8601 UTC
 });
 
@@ -44,7 +44,7 @@ it('exposes the bike via gear but carries no per-tire data (Strava provides none
 
     expect($payload['gear_id'])->toStartWith('b')
         ->and($payload['gear']['id'])->toBe($payload['gear_id'])
-        ->and($payload['gear']['distance'])->toBeGreaterThan(0)  // bike lifetime odometer (meters)
+        ->and($payload['gear']['distance'])->toBeGreaterThan(0)  // compteur kilométrique total du vélo (mètres)
         ->and($payload['gear'])->not->toHaveKey('tire')
         ->and($payload['gear'])->not->toHaveKey('components');
 });
@@ -53,5 +53,5 @@ it('namespaces our own derived surface separately from real Strava fields', func
     $payload = StravaActivity::factory()->create(['surface_derived' => Surface::Mixed])->raw_json;
 
     expect($payload['_derived']['surface'])->toBe('MIXED')
-        ->and($payload)->not->toHaveKey('surface'); // Strava itself never sends a surface field
+        ->and($payload)->not->toHaveKey('surface'); // Strava lui-même n'envoie jamais de champ surface
 });

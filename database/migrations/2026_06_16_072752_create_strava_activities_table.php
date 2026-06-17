@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Exécute les migrations.
      */
     public function up(): void
     {
@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('external_id');
             $table->string('sport_type');
-            $table->string('gear_id')->nullable()->index(); // Strava gear (bike) → tire attribution
+            $table->string('gear_id')->nullable()->index(); // Équipement Strava (vélo) → attribution du pneu
 
             // Métriques Strava
             $table->unsignedInteger('distance_m');
@@ -40,7 +40,7 @@ return new class extends Migration
     }
 
     /**
-     * Reverse the migrations.
+     * Annule les migrations.
      */
     public function down(): void
     {
