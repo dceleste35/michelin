@@ -2,6 +2,7 @@
 
 use App\Enums\Surface;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Number;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
@@ -22,6 +23,7 @@ new #[Title('Activities')] class extends Component
     {
         return auth()->user()
             ->stravaActivities()
+            ->select(['id', 'sport_type', 'surface_derived', 'distance_m', 'total_elevation_gain_m', 'start_date'])
             ->orderByDesc('start_date')
             ->paginate(20);
     }
@@ -78,10 +80,10 @@ new #[Title('Activities')] class extends Component
                             @endif
                         </flux:table.cell>
                         <flux:table.cell align="end" variant="strong">
-                            {{ number_format($activity->distance_m / 1000, 1, ',', ' ') }} km
+                            {{ Number::format($activity->distance_m / 1000, precision: 1) }} km
                         </flux:table.cell>
                         <flux:table.cell align="end">
-                            {{ number_format($activity->total_elevation_gain_m, 0, ',', ' ') }} m
+                            {{ Number::format($activity->total_elevation_gain_m) }} m
                         </flux:table.cell>
                     </flux:table.row>
                 @endforeach
