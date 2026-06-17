@@ -3,8 +3,10 @@
 namespace App\Models;
 
 use App\Enums\Surface;
+use Database\Factories\StravaActivityFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
@@ -20,7 +22,7 @@ use Illuminate\Support\Carbon;
  * @property int $total_elevation_gain_m
  * @property int|null $average_watts
  * @property int|null $average_cadence
- * @property Surface|null $surface
+ * @property Surface|null $surface_derived
  * @property Carbon $start_date
  * @property array<string, mixed>|null $raw_json
  */
@@ -34,12 +36,15 @@ use Illuminate\Support\Carbon;
     'total_elevation_gain_m',
     'average_watts',
     'average_cadence',
-    'surface',
+    'surface_derived',
     'start_date',
     'raw_json',
 ])]
 class StravaActivity extends Model
 {
+    /** @use HasFactory<StravaActivityFactory> */
+    use HasFactory;
+
     /**
      * Get the attributes that should be cast.
      *
@@ -48,7 +53,7 @@ class StravaActivity extends Model
     protected function casts(): array
     {
         return [
-            'surface' => Surface::class,
+            'surface_derived' => Surface::class,
             'raw_json' => 'array',
             'start_date' => 'datetime',
         ];

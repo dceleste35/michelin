@@ -32,7 +32,7 @@ function makeActivity(User $user, array $overrides = []): StravaActivity
         'total_elevation_gain_m' => 1240,
         'average_watts' => 178,
         'average_cadence' => 84,
-        'surface' => 'MIXED',
+        'surface_derived' => 'MIXED',
         'start_date' => now(),
         'raw_json' => json_encode(['id' => 1429876]),
     ], $overrides));

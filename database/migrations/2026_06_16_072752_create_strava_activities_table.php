@@ -26,7 +26,7 @@ return new class extends Migration
             $table->unsignedSmallInteger('average_cadence')->nullable();
 
             // Surface dérivée (SCORE) — voir ProfileInferenceService
-            $table->enum('surface', ['ASPHALT', 'HARDPACKED', 'MIXED', 'SOFT', 'MUD'])->nullable();
+            $table->enum('surface_derived', ['ASPHALT', 'HARDPACKED', 'MIXED', 'SOFT', 'MUD'])->nullable();
 
             $table->timestamp('start_date')->index();
             $table->jsonb('raw_json');
