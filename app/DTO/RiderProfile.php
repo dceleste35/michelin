@@ -8,12 +8,12 @@ use Illuminate\Contracts\Support\Arrayable;
 use JsonSerializable;
 
 /**
- * Shared rider-profile contract (UC-1).
+ * Contrat partagé du profil du cycliste (UC-1).
  *
- * Producer: Dan (ProfileInferenceService). Consumers: Nolan (moteur), Guillaume (UI).
- * Frozen in S1 so B & C can code against it while the inference is built (#9 / S3).
+ * Producteur : Dan (ProfileInferenceService). Consommateurs : Nolan (moteur), Guillaume (UI).
+ * Gelé en S1 afin que B & C puissent coder dessus pendant la construction de l'inférence (#9 / S3).
  *
- * JSON shape:
+ * Forme JSON :
  *   {
  *     "segment": "GRAVEL",
  *     "weight_kg": 90,
@@ -26,7 +26,7 @@ use JsonSerializable;
 final readonly class RiderProfile implements Arrayable, JsonSerializable
 {
     /**
-     * @param  array<string, int|float>  $terrainPct  surface key => percent (0–100), summing ~100
+     * @param  array<string, int|float>  $terrainPct  clé de surface => pourcentage (0–100), totalisant ~100
      */
     public function __construct(
         public Segment $segment,
@@ -36,8 +36,8 @@ final readonly class RiderProfile implements Arrayable, JsonSerializable
     ) {}
 
     /**
-     * Representative mock of the hero rider (Marc, GRAVEL, 60/40 asphalt/off-road),
-     * so Nolan & Guillaume can build against the contract before the inference lands (#9).
+     * Mock représentatif du cycliste vedette (Marc, GRAVEL, 60/40 asphalte/hors-route),
+     * afin que Nolan & Guillaume puissent développer sur le contrat avant l'arrivée de l'inférence (#9).
      */
     public static function mockMarc(): self
     {

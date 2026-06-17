@@ -54,7 +54,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Product extends Model
 {
     /**
-     * Get the attributes that should be cast.
+     * Récupère les attributs qui doivent être castés.
      *
      * @return array<string, string>
      */
@@ -66,7 +66,7 @@ class Product extends Model
     }
 
     /**
-     * The tire mounts referencing this product.
+     * Les montages de pneus référençant ce produit.
      *
      * @return HasMany<UserTire, $this>
      */

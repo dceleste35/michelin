@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome')->name('home');
 
-// "Connect with Strava" — simulated for the prototype (signs in as the seeded hero, Marc).
+// « Connect with Strava » — simulé pour le prototype (connecte le héros de démo, Marc).
 Route::get('auth/strava/connect', [StravaController::class, 'connect'])->name('strava.connect');
 
 Route::middleware(['auth', 'verified'])->group(function () {

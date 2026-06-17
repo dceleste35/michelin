@@ -15,12 +15,12 @@ it('shows the Connect with Strava button on the login page', function () {
 });
 
 it('first connect signs in as Marc and routes to the onboarding smart default', function () {
-    $marc = seedDemoMarc(); // profile_confirmed_at null → first time
+    $marc = seedDemoMarc(); // profile_confirmed_at null → première fois
 
     $this->get(route('strava.connect'))
         ->assertOk()
         ->assertSee('Connecting to Strava', false)
-        ->assertSee(route('profile'), false); // onboarding target
+        ->assertSee(route('profile'), false); // cible de l'onboarding
 
     $this->assertAuthenticatedAs($marc);
 });
@@ -32,8 +32,8 @@ it('connect skips onboarding and goes to activities once the profile is confirme
 
     $this->get(route('strava.connect'))
         ->assertOk()
-        ->assertSee(route('activities'), false)   // straight to activities
-        ->assertDontSee(route('profile'), false); // no longer re-asks
+        ->assertSee(route('activities'), false)   // directement vers les activités
+        ->assertDontSee(route('profile'), false); // ne redemande plus
 });
 
 it('connect errors and stays guest when the demo profile is not seeded', function () {

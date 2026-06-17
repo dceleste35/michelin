@@ -12,22 +12,24 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 /**
- * UC-1 — deterministic rider-profile inference (pure SCORE, no AI).
+ * UC-1 — inférence déterministe du profil du cycliste (pur SCORE, sans IA).
  *
- * Analyses the user's last 6 months of `strava_activities` and classifies plain
- * numbers into intervals to infer segment, riding style and terrain mix. Every
- * rule is explainable to the jury and fully reproducible. This is a *smart
- * default*, never a verdict — the user can override it (segment_overridden).
+ * Analyse les 6 derniers mois de `strava_activities` de l'utilisateur et classe
+ * de simples nombres dans des intervalles afin d'inférer le segment, le style de
+ * pratique et la répartition des terrains. Chaque règle est explicable au jury et
+ * entièrement reproductible. Il s'agit d'une *valeur par défaut intelligente*,
+ * jamais d'un verdict — l'utilisateur peut la remplacer (segment_overridden).
  */
 class ProfileInferenceService
 {
-    private const DEFAULT_SYSTEM_WEIGHT_KG = 90; // ~80 kg rider + ~10 kg gravel bike
+    private const DEFAULT_SYSTEM_WEIGHT_KG = 90; // ~80 kg de cycliste + ~10 kg de vélo gravel
 
     /**
-     * Read the user's current (persisted) profile for downstream consumers
-     * (Nolan's engine, Guillaume's UI). Terrain mix is computed live from the
-     * last six months; segment/style/weight come from the persisted fields with
-     * safe GRAVEL defaults when inference has not run yet.
+     * Lit le profil actuel (persisté) de l'utilisateur pour les consommateurs en
+     * aval (le moteur de Nolan, l'UI de Guillaume). La répartition des terrains est
+     * calculée en direct sur les six derniers mois ; le segment/style/poids
+     * proviennent des champs persistés, avec des valeurs GRAVEL par défaut sûres
+     * lorsque l'inférence n'a pas encore été exécutée.
      */
     public function buildProfile(User $user): RiderProfile
     {
@@ -40,7 +42,7 @@ class ProfileInferenceService
     }
 
     /**
-     * Infer the full profile from the user's activities (no persistence).
+     * Infère le profil complet à partir des activités de l'utilisateur (sans persistance).
      */
     public function infer(User $user): RiderProfile
     {
@@ -56,8 +58,8 @@ class ProfileInferenceService
     }
 
     /**
-     * Infer the profile and persist segment / riding_style / weight_kg on the
-     * user. A user-overridden segment is preserved (segment_overridden).
+     * Infère le profil et persiste segment / riding_style / weight_kg sur
+     * l'utilisateur. Un segment remplacé par l'utilisateur est préservé (segment_overridden).
      */
     public function inferAndPersist(User $user): RiderProfile
     {
@@ -74,13 +76,13 @@ class ProfileInferenceService
     }
 
     /**
-     * Infer the dominant segment from the off-road share (last 6 months).
+     * Infère le segment dominant à partir de la part hors-route (6 derniers mois).
      *
-     * - off-road > 70 %                  → MTB
-     * - 15 % ≤ off-road ≤ 70 %           → GRAVEL
-     * - off-road < 15 % (asphalt-heavy)  → ROAD (avg speed > 25 km/h confirms a
-     *   competitive road profile; consumed by the style inference)
-     * - majority EBikeRide               → EBIKE_URBAN
+     * - hors-route > 70 %                → MTB
+     * - 15 % ≤ hors-route ≤ 70 %         → GRAVEL
+     * - hors-route < 15 % (très asphalté) → ROAD (une vitesse moyenne > 25 km/h
+     *   confirme un profil route compétitif ; utilisé par l'inférence du style)
+     * - majorité EBikeRide               → EBIKE_URBAN
      *
      * @param  Collection<int, StravaActivity>  $activities
      */
@@ -107,10 +109,12 @@ class ProfileInferenceService
     }
 
     /**
-     * Infer riding style from power-to-weight and pace variability.
+     * Infère le style de pratique à partir du rapport puissance/poids et de la
+     * variabilité de l'allure.
      *
-     * High watts per kilo OR high cross-ride speed dispersion (a proxy for
-     * punchy, variable efforts) → AGGRESSIF; otherwise steady → ENDURANCE.
+     * Watts par kilo élevés OU forte dispersion de vitesse entre les sorties (un
+     * indicateur d'efforts explosifs et variables) → AGGRESSIF ; sinon, allure
+     * régulière → ENDURANCE.
      *
      * @param  Collection<int, StravaActivity>  $activities
      */
@@ -133,24 +137,26 @@ class ProfileInferenceService
     }
 
     /**
-     * Derive an activity's surface from Strava signals.
+     * Déduit la surface d'une activité à partir des signaux Strava.
      *
-     * Strava exposes no surface field, so we infer it from documented, explainable
-     * rules — an explicit hypothesis, not a black box (jury credibility point):
+     * Strava n'expose aucun champ de surface : nous la déduisons donc à partir de
+     * règles documentées et explicables — une hypothèse explicite, pas une boîte
+     * noire (point de crédibilité auprès du jury) :
      *
-     * - `Ride`/`VirtualRide` → ASPHALT. A road-bike activity is paved by definition
-     *   (and virtual/indoor rides too), regardless of how hilly it is.
-     * - `GravelRide` is dual-purpose, so we disambiguate by terrain:
-     *     flat **and** fast (≤8 m/km climbing, >24 km/h) → ASPHALT — a road-pace outing;
-     *     rolling (≤14 m/km) → HARDPACKED — typical groomed gravel;
-     *     hillier → MIXED — climbing implies broken/technical ground.
-     * - `MountainBikeRide`/`EMountainBikeRide` get rougher with elevation, and harsher
-     *   when the pace collapses (a proxy for technical/wet ground):
-     *     ≤15 m/km → MIXED; crawling (<12 km/h) → MUD; ≤30 m/km → SOFT; steeper → MUD.
-     * - `EBikeRide` (urban assist) → ASPHALT. Any other sport → MIXED (safe default).
+     * - `Ride`/`VirtualRide` → ASPHALT. Une activité de vélo de route est revêtue
+     *   par définition (les sorties virtuelles/intérieures aussi), quel que soit le dénivelé.
+     * - `GravelRide` est polyvalent : on lève donc l'ambiguïté selon le terrain :
+     *     plat **et** rapide (≤8 m/km de dénivelé, >24 km/h) → ASPHALT — une sortie à allure route ;
+     *     vallonné (≤14 m/km) → HARDPACKED — gravel roulant typique ;
+     *     plus montagneux → MIXED — le dénivelé implique un sol défoncé/technique.
+     * - `MountainBikeRide`/`EMountainBikeRide` deviennent plus rudes avec le dénivelé,
+     *   et plus sévères quand l'allure s'effondre (indicateur d'un sol technique/humide) :
+     *     ≤15 m/km → MIXED ; allure très lente (<12 km/h) → MUD ; ≤30 m/km → SOFT ; plus raide → MUD.
+     * - `EBikeRide` (assistance urbaine) → ASPHALT. Tout autre sport → MIXED (valeur par défaut sûre).
      *
-     * Robust to missing/zero distance, speed or elevation: `max()` guards the divisor
-     * and absent metrics read as 0, so no division-by-zero and no crash on edge cases.
+     * Robuste aux distances, vitesses ou dénivelés manquants/nuls : `max()` protège
+     * le diviseur et les métriques absentes valent 0, donc aucune division par zéro
+     * et aucun plantage sur les cas limites.
      */
     public function deriveSurface(StravaActivity $activity): Surface
     {
@@ -161,13 +167,13 @@ class ProfileInferenceService
         return match ($activity->sport_type) {
             'Ride', 'VirtualRide' => Surface::Asphalt,
             'GravelRide' => match (true) {
-                $elevationPerKm <= 8 && $avgKmh > 24 => Surface::Asphalt, // flat & fast = road-like
+                $elevationPerKm <= 8 && $avgKmh > 24 => Surface::Asphalt, // plat & rapide = type route
                 $elevationPerKm <= 14 => Surface::Hardpacked,
                 default => Surface::Mixed,
             },
             'MountainBikeRide', 'EMountainBikeRide' => match (true) {
                 $elevationPerKm <= 15 => Surface::Mixed,
-                $avgKmh < 12 => Surface::Mud,         // crawling pace + climbing = technical/muddy
+                $avgKmh < 12 => Surface::Mud,         // allure très lente + dénivelé = technique/boueux
                 $elevationPerKm <= 30 => Surface::Soft,
                 default => Surface::Mud,
             },
@@ -177,7 +183,7 @@ class ProfileInferenceService
     }
 
     /**
-     * Terrain mix as integer percentages per surface (keys always present).
+     * Répartition des terrains en pourcentages entiers par surface (clés toujours présentes).
      *
      * @param  Collection<int, StravaActivity>  $activities
      * @return array<string, int>
@@ -204,7 +210,7 @@ class ProfileInferenceService
     }
 
     /**
-     * The user's activities over the inference window (last 6 months).
+     * Les activités de l'utilisateur sur la fenêtre d'inférence (6 derniers mois).
      *
      * @return Collection<int, StravaActivity>
      */
@@ -221,7 +227,7 @@ class ProfileInferenceService
     }
 
     /**
-     * The activity's stored derived surface, deriving it on the fly when absent.
+     * La surface déduite stockée de l'activité, calculée à la volée si absente.
      */
     private function surfaceOf(StravaActivity $activity): Surface
     {
@@ -229,7 +235,7 @@ class ProfileInferenceService
     }
 
     /**
-     * Population standard deviation of a non-empty numeric collection.
+     * Écart-type de population d'une collection numérique non vide.
      *
      * @param  Collection<int, float>  $values
      */

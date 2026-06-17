@@ -28,13 +28,13 @@ class AppServiceProvider extends ServiceProvider
     }
 
     /**
-     * Configure default behaviors for production-ready applications.
+     * Configure les comportements par défaut pour une application prête pour la production.
      */
     protected function configureDefaults(): void
     {
         Date::use(CarbonImmutable::class);
 
-        // Locale-aware number formatting (FR app, EN tests) — follows app.locale.
+        // Formatage des nombres selon la locale (FR en app, EN en tests) — suit app.locale.
         Number::useLocale(app()->getLocale());
 
         DB::prohibitDestructiveCommands(

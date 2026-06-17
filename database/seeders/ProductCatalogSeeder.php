@@ -8,15 +8,15 @@ use Illuminate\Database\Seeder;
 class ProductCatalogSeeder extends Seeder
 {
     /**
-     * Seed a representative, public sample of the Michelin 2W bicycle catalog.
+     * Alimente un échantillon public et représentatif du catalogue vélo 2W de Michelin.
      *
-     * The full proprietary catalog (~442 products) is NOT committed to this
-     * public repository. This curated sample uses real catalog values and
-     * covers the four rider segments and the demo scenario: Marc rides a worn
-     * Power Gravel (ETRTO 40-622) and is upsold the Power Gravel RS (42-622),
-     * both on 622 wheels. `expected_life_km` and `rolling_resistance_watts`
-     * are business estimates (absent from the source catalog) and only filled
-     * for the demo gravel pair.
+     * Le catalogue propriétaire complet (~442 produits) n'est PAS versionné dans ce
+     * dépôt public. Cet échantillon sélectionné utilise de vraies valeurs du catalogue et
+     * couvre les quatre segments de cyclistes ainsi que le scénario de démo : Marc roule sur un
+     * Power Gravel usé (ETRTO 40-622) et se voit proposer en montée de gamme le Power Gravel RS (42-622),
+     * tous deux sur des roues 622. `expected_life_km` et `rolling_resistance_watts`
+     * sont des estimations métier (absentes du catalogue source) et ne sont renseignés
+     * que pour la paire gravel de la démo.
      */
     public function run(): void
     {
@@ -29,8 +29,8 @@ class ProductCatalogSeeder extends Seeder
     }
 
     /**
-     * Curated catalog sample. Upsert key is `ean_code` (unique per size);
-     * `global_id` is the catalog *range* id, shared across a range's sizes.
+     * Échantillon de catalogue sélectionné. La clé d'upsert est `ean_code` (unique par taille) ;
+     * `global_id` est l'identifiant de *gamme* du catalogue, partagé entre les tailles d'une même gamme.
      *
      * @return list<array<string, mixed>>
      */

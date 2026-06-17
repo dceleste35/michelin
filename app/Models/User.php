@@ -43,7 +43,7 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     /**
-     * Default attribute values mirroring the database defaults.
+     * Valeurs par défaut des attributs, alignées sur les valeurs par défaut de la base de données.
      *
      * @var array<string, mixed>
      */
@@ -70,7 +70,7 @@ class User extends Authenticatable
     }
 
     /**
-     * The user's Strava activities.
+     * Les activités Strava de l'utilisateur.
      *
      * @return HasMany<StravaActivity, $this>
      */
@@ -80,7 +80,7 @@ class User extends Authenticatable
     }
 
     /**
-     * The user's mounted tires.
+     * Les pneus montés de l'utilisateur.
      *
      * @return HasMany<UserTire, $this>
      */
@@ -90,7 +90,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Limit the query to users connected to Strava.
+     * Restreint la requête aux utilisateurs connectés à Strava.
      *
      * @param  Builder<User>  $query
      */

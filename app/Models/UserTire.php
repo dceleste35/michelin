@@ -31,7 +31,7 @@ use Illuminate\Support\Carbon;
 class UserTire extends Model
 {
     /**
-     * Get the attributes that should be cast.
+     * Récupère les attributs qui doivent être castés.
      *
      * @return array<string, string>
      */
@@ -45,7 +45,7 @@ class UserTire extends Model
     }
 
     /**
-     * The owner of this tire mount.
+     * Le propriétaire de ce montage de pneu.
      *
      * @return BelongsTo<User, $this>
      */
@@ -55,7 +55,7 @@ class UserTire extends Model
     }
 
     /**
-     * The catalog product mounted.
+     * Le produit du catalogue monté.
      *
      * @return BelongsTo<Product, $this>
      */
@@ -65,7 +65,7 @@ class UserTire extends Model
     }
 
     /**
-     * Limit the query to active (currently mounted) tires.
+     * Limite la requête aux pneus actifs (actuellement montés).
      *
      * @param  Builder<UserTire>  $query
      */
