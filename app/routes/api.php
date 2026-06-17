@@ -1,9 +1,11 @@
 <?php
 
 use App\Http\Controllers\Api\TireHealthController;
+use App\Http\Controllers\Api\RecommendationController;
 use Illuminate\Support\Facades\Route;
 
-// Idéalement, ces routes seront protégées par un middleware d'authentification (ex: auth:sanctum)
 Route::prefix('tires')->group(function () {
     Route::get('/{userTireId}/health', [TireHealthController::class, 'show']);
 });
+
+Route::get('/users/{userId}/recommendation', [RecommendationController::class, 'show']);

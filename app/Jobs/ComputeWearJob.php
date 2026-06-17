@@ -4,7 +4,7 @@ namespace App\Jobs;
 
 use App\Models\UserTire;
 use App\Services\WearService;
-use App\Services\LlmService; // On l'utilisera plus tard pour rédiger la notif
+use App\Services\LlmService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -54,9 +54,13 @@ class ComputeWearJob implements ShouldQueue
     }
 
     private function triggerAlert(int $userId, int $tireId, array $health, float $weeklyAverageKm): void
-    {
-        // TODO (Phase 3) : Faire appel au LlmService pour rédiger la notification
-        // TODO : Pousser la notification en base de données ou via un système de push
-        // echo "Alerte déclenchée pour le user $userId ! Reste {$health['remaining_km']} km.";
-    }
+        {
+            // On génère la recommandation et on la met en cache !
+            $recommender = app(\App\Services\RecommenderService::class);
+            $reco = $recommender->generateRecommendation($tireId);
+
+            \Illuminate\Support\Facades\Log::info("Alerte déclenchée pour le user {$userId} ! Reco générée : " . $reco['recommended_tire']);
+            
+            // La suite : Pousser la notification in-app ou par mail
+        }
 }
