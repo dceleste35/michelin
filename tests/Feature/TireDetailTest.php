@@ -36,26 +36,26 @@ it('forbids viewing another rider tire', function () {
     $this->get(route('tires.show', $tire))->assertForbidden();
 });
 
-it('shows the rides ridden since the tire was mounted, with distance and provisional wear', function () {
+it('shows the rides ridden on this tire, with distance and provisional wear', function () {
     $user = User::factory()->create();
     $tire = tireFor($user);
-    StravaActivity::factory()->for($user)->create(['distance_m' => 40000, 'start_date' => now()->subDays(10)]); // après montage
-    StravaActivity::factory()->for($user)->create(['distance_m' => 99000, 'start_date' => now()->subDays(60)]); // avant montage
+    StravaActivity::factory()->for($user)->create(['distance_m' => 40000, 'rear_tire_id' => $tire->id]); // monté sur ce pneu
+    StravaActivity::factory()->for($user)->create(['distance_m' => 99000]);                              // aucun pneu assigné
 
     $this->actingAs($user);
 
     Livewire::test('pages::tire-detail', ['userTire' => $tire])
-        ->assertSee('40.0 km')      // sortie après montage (locale en)
-        ->assertDontSee('99.0 km')  // sortie avant montage exclue
+        ->assertSee('40.0 km')      // sortie sur ce pneu (locale en)
+        ->assertDontSee('99.0 km')  // sortie hors de ce pneu exclue
         ->assertSee('42%');         // usure provisoire
 });
 
-it('shows an empty rides state when nothing was ridden since mount', function () {
+it('shows an empty rides state when nothing was ridden on this tire', function () {
     $user = User::factory()->create();
     $tire = tireFor($user);
 
     $this->actingAs($user);
 
     Livewire::test('pages::tire-detail', ['userTire' => $tire])
-        ->assertSee('No ride recorded since this tire was mounted.');
+        ->assertSee('No ride recorded on this tire yet.');
 });

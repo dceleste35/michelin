@@ -23,7 +23,7 @@ it('réinitialise la démo sur Marc à 86 % de façon déterministe et idempoten
     $this->artisan('demo:reset')->assertSuccessful();
 
     $marc = User::where('email', 'marc@rideready.test')->firstOrFail();
-    expect((float) $marc->tires()->where('position', 'REAR')->first()->wear_percent)->toBe(86.0)
+    expect((float) $marc->tires()->where('position', 'REAR')->where('is_active', true)->first()->wear_percent)->toBe(86.0)
         ->and($marc->stravaActivities()->count())->toBe(80);
 
     // Deuxième exécution → état identique, aucun doublon.

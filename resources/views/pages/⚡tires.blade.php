@@ -114,8 +114,11 @@ new #[Title('My tires')] class extends Component
 
                     <div class="flex min-w-0 flex-1 flex-col pl-1.5">
                         <span class="truncate text-sm font-black tracking-tight text-zinc-900 dark:text-white">{{ $tire->product->web_range_name }}</span>
-                        <span class="mt-1 flex items-center gap-2 text-[11px] font-bold text-zinc-400">
+                        <span class="mt-1 flex flex-wrap items-center gap-2 text-[11px] font-bold text-zinc-400">
                             <span class="rounded-full bg-zinc-100 px-2 py-0.5 uppercase tracking-wider text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">{{ $isFront ? __('Front') : __('Rear') }}</span>
+                            @unless ($tire->is_active)
+                                <span class="rounded-full bg-zinc-200 px-2 py-0.5 uppercase tracking-wider text-zinc-500 dark:bg-zinc-700 dark:text-zinc-400" data-test="tire-retired">{{ __('Retired') }}</span>
+                            @endunless
                             <span>{{ $tire->mounted_at?->translatedFormat('j M Y') ?? '—' }}</span>
                         </span>
                     </div>

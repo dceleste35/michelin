@@ -17,9 +17,10 @@ use Illuminate\Support\Facades\Hash;
 
 /**
  * Persona vedette : Marc (GRAVEL). ~80 activités GravelRide sur 6 mois, 60/40
- * asphalte/tout-terrain, roulant sur un Power Gravel usé (arrière 86 %). Entièrement
- * déterministe afin que `demo:reset` reproduise exactement l'état de la démo.
- * Nécessite ProductCatalogSeeder.
+ * asphalte/tout-terrain. Marc a changé de pneus à mi-saison : un ancien jeu Power
+ * Gravel (retiré, 100 % usé) sur les vieilles sorties, et le jeu actuel (arrière 86 %)
+ * sur les récentes — l'historique par sortie est conservé. Entièrement déterministe
+ * pour que `demo:reset` reproduise l'état exact. Nécessite ProductCatalogSeeder.
  */
 class MarcSeeder extends Seeder
 {
@@ -30,6 +31,10 @@ class MarcSeeder extends Seeder
     private const ACTIVITY_BASE_ID = 15_000_000_000;
 
     private const GEAR_ID = 'b9100042'; // L'unique vélo gravel de Marc (gear id Strava)
+
+    private const SWAP_INDEX = 40; // sorties 0–39 (récentes) = jeu actuel ; 40–79 (anciennes) = ancien jeu
+
+    private const UNCONFIRMED_RECENT = 8; // les 8 sorties les plus récentes restent « à vérifier »
 
     public function run(): void
     {
@@ -46,11 +51,50 @@ class MarcSeeder extends Seeder
             ],
         );
 
-        $this->seedActivities($marc);
-        $this->mountPowerGravel($marc);
+        $tires = $this->mountTires($marc);
+        $this->seedActivities($marc, $tires);
     }
 
-    private function seedActivities(User $marc): void
+    /**
+     * Crée la collection de pneus de Marc : le jeu actuel (actif) + l'ancien jeu (retiré).
+     *
+     * @return array{current: array<string, UserTire>, old: array<string, UserTire>}
+     */
+    private function mountTires(User $marc): array
+    {
+        $powerGravel = Product::where('web_range_name', 'Power Gravel')->sole();
+        $now = CarbonImmutable::now();
+
+        // Jeu actuel (actif) — calibré 86 % arrière / 72 % avant : déclenche l'alerte de démo.
+        $current = [
+            TirePosition::Rear->value => $this->tire($marc, $powerGravel, TirePosition::Rear, $now->subDays(90), 4200, 86.0, true),
+            TirePosition::Front->value => $this->tire($marc, $powerGravel, TirePosition::Front, $now->subDays(90), 4200, 72.0, true),
+        ];
+
+        // Ancien jeu (retiré il y a ~90 j, usé à 100 % puis remplacé) — garde son historique.
+        $old = [
+            TirePosition::Rear->value => $this->tire($marc, $powerGravel, TirePosition::Rear, $now->subDays(180), 0, 100.0, false),
+            TirePosition::Front->value => $this->tire($marc, $powerGravel, TirePosition::Front, $now->subDays(180), 0, 100.0, false),
+        ];
+
+        return ['current' => $current, 'old' => $old];
+    }
+
+    /**
+     * Crée (ou met à jour) un pneu monté, identifié par (utilisateur, produit, position, actif).
+     */
+    private function tire(User $marc, Product $product, TirePosition $position, CarbonImmutable $mountedAt, int $odometer, float $wear, bool $active): UserTire
+    {
+        return UserTire::updateOrCreate(
+            ['user_id' => $marc->id, 'product_id' => $product->id, 'position' => $position, 'is_active' => $active],
+            ['mounted_at' => $mountedAt->toDateString(), 'mounted_odometer_km' => $odometer, 'wear_percent' => $wear],
+        );
+    }
+
+    /**
+     * @param  array{current: array<string, UserTire>, old: array<string, UserTire>}  $tires
+     */
+    private function seedActivities(User $marc, array $tires): void
     {
         $now = CarbonImmutable::now();
         $inference = app(ProfileInferenceService::class);
@@ -71,6 +115,9 @@ class MarcSeeder extends Seeder
             $avgSpeedMs = 7.2; // ~26 km/h, allure d'endurance régulière
             $externalId = (string) (self::ACTIVITY_BASE_ID + $i);
 
+            // Swap : sorties récentes (i < 40) sur le jeu actuel, anciennes sur l'ancien jeu.
+            $era = $i < self::SWAP_INDEX ? 'current' : 'old';
+
             $attributes = [
                 'external_id' => $externalId,
                 'gear_id' => self::GEAR_ID,
@@ -86,30 +133,15 @@ class MarcSeeder extends Seeder
 
             // La surface est DÉRIVÉE des signaux de la sortie via les règles documentées.
             $attributes['surface_derived'] = $inference->deriveSurface(new StravaActivity($attributes));
+            // Pneus montés lors de la sortie (auto = jeu de l'époque). Les récentes restent à vérifier.
+            $attributes['front_tire_id'] = $tires[$era][TirePosition::Front->value]->id;
+            $attributes['rear_tire_id'] = $tires[$era][TirePosition::Rear->value]->id;
+            $attributes['tires_confirmed'] = $i >= self::UNCONFIRMED_RECENT;
             $attributes['raw_json'] = StravaActivityFactory::stravaPayload($attributes, self::ATHLETE_ID);
 
             StravaActivity::updateOrCreate(
                 ['user_id' => $marc->id, 'external_id' => $externalId],
                 $attributes,
-            );
-        }
-    }
-
-    private function mountPowerGravel(User $marc): void
-    {
-        $powerGravel = Product::where('web_range_name', 'Power Gravel')->sole();
-        $mountedAt = CarbonImmutable::now()->subDays(180)->toDateString();
-
-        // L'arrière s'use plus vite → 86 % (déclenche l'alerte de la démo) ; l'avant suit à 72 %.
-        foreach ([[TirePosition::Rear, 86.0], [TirePosition::Front, 72.0]] as [$position, $wear]) {
-            UserTire::updateOrCreate(
-                ['user_id' => $marc->id, 'product_id' => $powerGravel->id, 'position' => $position],
-                [
-                    'mounted_at' => $mountedAt,
-                    'mounted_odometer_km' => 1200,
-                    'wear_percent' => $wear,
-                    'is_active' => true,
-                ],
             );
         }
     }

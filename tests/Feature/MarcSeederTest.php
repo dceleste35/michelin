@@ -84,12 +84,12 @@ it('attributes every Marc activity to a single bike (gear) for tire tracking', f
 it('mounts a worn Power Gravel (rear 86 %, active) on Marc', function () {
     $marc = seedMarc();
 
-    $rear = $marc->tires()->where('position', TirePosition::Rear->value)->sole();
+    $rear = $marc->tires()->where('position', TirePosition::Rear->value)->where('is_active', true)->sole();
 
     expect((float) $rear->wear_percent)->toBe(86.0)
         ->and($rear->is_active)->toBeTrue()
         ->and($rear->product->web_range_name)->toBe('Power Gravel')
-        ->and($marc->tires()->where('is_active', true)->count())->toBe(2); // avant + arrière
+        ->and($marc->tires()->where('is_active', true)->count())->toBe(2); // jeu actuel avant + arrière
 });
 
 it('is deterministic and idempotent (re-seeding does not duplicate)', function () {
@@ -97,7 +97,7 @@ it('is deterministic and idempotent (re-seeding does not duplicate)', function (
     test()->seed(MarcSeeder::class); // relance
 
     expect($marc->stravaActivities()->count())->toBe(80)
-        ->and(UserTire::where('user_id', $marc->id)->count())->toBe(2)
+        ->and(UserTire::where('user_id', $marc->id)->count())->toBe(4) // 2 actifs + 2 retirés (swap)
         ->and(User::where('email', 'marc@rideready.test')->count())->toBe(1);
 });
 

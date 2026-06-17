@@ -28,11 +28,8 @@ new #[Title('Tire detail')] class extends Component
     #[Computed]
     public function rides(): Collection
     {
-        return auth()->user()->stravaActivities()
-            ->when(
-                $this->userTire->mounted_at,
-                fn ($query) => $query->where('start_date', '>=', $this->userTire->mounted_at)
-            )
+        return StravaActivity::query()
+            ->forUserTire($this->userTire)
             ->orderByDesc('start_date')
             ->get();
     }
@@ -112,7 +109,7 @@ new #[Title('Tire detail')] class extends Component
     <div class="flex items-center justify-between">
         <h2 class="flex items-center gap-2 text-sm font-black uppercase tracking-wider text-zinc-800 dark:text-zinc-100">
             <span class="inline-block h-4 w-1 rounded-full bg-michelin-blue"></span>
-            {{ __('Rides since mount') }}
+            {{ __('Rides on this tire') }}
         </h2>
         <span class="rounded-full bg-zinc-100 px-2.5 py-0.5 text-[11px] font-bold text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">{{ $this->rides->count() }}</span>
     </div>
@@ -141,7 +138,7 @@ new #[Title('Tire detail')] class extends Component
     @else
         <div class="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-zinc-300 px-6 py-10 text-center dark:border-zinc-700" data-test="tire-rides-empty">
             <svg class="size-8 text-zinc-300 dark:text-zinc-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2Z" /></svg>
-            <p class="text-sm font-medium text-zinc-500">{{ __('No ride recorded since this tire was mounted.') }}</p>
+            <p class="text-sm font-medium text-zinc-500">{{ __('No ride recorded on this tire yet.') }}</p>
         </div>
     @endif
 

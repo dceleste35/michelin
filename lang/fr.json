@@ -152,5 +152,10 @@
     "Wear is computed by the scoring engine — provisional for now.": "L'usure est calculée par le moteur de scoring — provisoire pour l'instant.",
     "Rides since mount": "Sorties depuis le montage",
     "No ride recorded since this tire was mounted.": "Aucune sortie enregistrée depuis le montage de ce pneu.",
-    "Back to my tires": "Retour à mes pneus"
+    "Back to my tires": "Retour à mes pneus",
+    "Rides on this tire": "Sorties sur ce pneu",
+    "No ride recorded on this tire yet.": "Aucune sortie enregistrée sur ce pneu.",
+    "Retired": "Retiré",
+    "Confirm all": "Tout confirmer",
+    "To verify": "À vérifier"
 }
