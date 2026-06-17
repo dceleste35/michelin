@@ -1,0 +1,61 @@
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: ops/Dockerfile
+    container_name: michelin-app
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+      - "5173:5173"
+    volumes:
+      - ..:/var/www/html:delegated
+      - /var/www/html/vendor
+      - ./.env:/var/www/html/.env
+    env_file:
+      - .env
+    depends_on:
+      - db
+    networks:
+      - michelin-network
+
+  db:
+    image: pgvector/pgvector:pg17
+    container_name: michelin-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-postgres}
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-mysecretpassword}
+    ports:
+      - "5432:5432"
+    volumes:
+      - michelin-db-data:/var/lib/postgresql/data
+    networks:
+      - michelin-network
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: michelin-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@michelin.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-adminpassword}
+    ports:
+      - "5050:80"
+    volumes:
+      - michelin-pgadmin-data:/var/lib/pgadmin
+    depends_on:
+      - db
+    networks:
+      - michelin-network
+
+networks:
+  michelin-network:
+    driver: bridge
+
+volumes:
+  michelin-db-data:
+    driver: local
+  michelin-pgadmin-data:
+    driver: local

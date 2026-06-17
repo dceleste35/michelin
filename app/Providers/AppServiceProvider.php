@@ -5,6 +5,7 @@ namespace App\Providers;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Number;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -27,11 +28,14 @@ class AppServiceProvider extends ServiceProvider
     }
 
     /**
-     * Configure default behaviors for production-ready applications.
+     * Configure les comportements par défaut pour une application prête pour la production.
      */
     protected function configureDefaults(): void
     {
         Date::use(CarbonImmutable::class);
+
+        // Formatage des nombres selon la locale (FR en app, EN en tests) — suit app.locale.
+        Number::useLocale(app()->getLocale());
 
         DB::prohibitDestructiveCommands(
             app()->isProduction(),

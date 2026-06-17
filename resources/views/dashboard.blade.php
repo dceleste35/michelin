@@ -1,18 +1,28 @@
 <x-layouts::app :title="__('Dashboard')">
-    <div class="flex h-full w-full flex-1 flex-col gap-4 rounded-xl">
-        <div class="grid auto-rows-min gap-4 md:grid-cols-3">
-            <div class="relative aspect-video overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700">
-                <x-placeholder-pattern class="absolute inset-0 size-full stroke-gray-900/20 dark:stroke-neutral-100/20" />
+    <div class="flex h-full w-full flex-1 flex-col gap-6 rounded-xl">
+        <!-- Title and description -->
+        <div class="flex flex-col gap-1.5">
+            <h2 class="text-xl font-black text-zinc-800 dark:text-zinc-100 tracking-tight flex items-center gap-2">
+                <span class="inline-block w-2 h-5 bg-accent rounded-full"></span>
+                {{ __('Mes Équipements') }}
+            </h2>
+            <p class="text-xs text-zinc-500 dark:text-zinc-400">
+                {{ __('Suivi en temps réel de l\'usure et des performances de vos pneus vélo Michelin.') }}
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+            <!-- Tire Wear Card Component -->
+            <div class="lg:col-span-1">
+                <livewire:tire-wear-card />
             </div>
-            <div class="relative aspect-video overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700">
-                <x-placeholder-pattern class="absolute inset-0 size-full stroke-gray-900/20 dark:stroke-neutral-100/20" />
-            </div>
-            <div class="relative aspect-video overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700">
-                <x-placeholder-pattern class="absolute inset-0 size-full stroke-gray-900/20 dark:stroke-neutral-100/20" />
+
+            <!-- Tire Recommendation & Comparison Component -->
+            <div class="lg:col-span-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5 shadow-sm">
+                <livewire:tire-recommendation />
             </div>
         </div>
-        <div class="relative h-full flex-1 overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700">
-            <x-placeholder-pattern class="absolute inset-0 size-full stroke-gray-900/20 dark:stroke-neutral-100/20" />
-        </div>
+
     </div>
 </x-layouts::app>
+

@@ -18,6 +18,15 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
+
+            // RideReady — profil rider (inféré par ProfileInferenceService, SCORE)
+            $table->string('strava_athlete_id')->nullable()->unique();
+            $table->unsignedSmallInteger('weight_kg')->nullable();
+            $table->enum('segment', ['GRAVEL', 'ROAD', 'MTB', 'EBIKE_URBAN'])->nullable();
+            $table->boolean('segment_overridden')->default(false);
+            $table->enum('riding_style', ['ENDURANCE', 'AGGRESSIF'])->nullable();
+            $table->timestamp('profile_confirmed_at')->nullable(); // validation de la valeur par défaut intelligente (une seule fois)
+
             $table->timestamps();
         });
 
