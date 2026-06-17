@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="refresh" content="2;url={{ route('dashboard') }}">
+    <meta http-equiv="refresh" content="2;url={{ route('activities') }}">
     <title>{{ __('Connecting to Strava…') }}</title>
     <style>
         body { margin: 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center;
@@ -22,6 +22,6 @@
         <h1>{{ __('Connecting to Strava…') }}</h1>
         <p class="sub">{{ __('Importing your rides') }}</p>
     </div>
-    <noscript><a href="{{ route('dashboard') }}">{{ __('Continue') }}</a></noscript>
+    <noscript><a href="{{ route('activities') }}">{{ __('Continue') }}</a></noscript>
 </body>
 </html>

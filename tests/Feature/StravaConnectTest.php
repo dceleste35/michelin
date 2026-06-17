@@ -20,7 +20,7 @@ it('simulated connect signs in as Marc and shows the Strava interstitial', funct
     $this->get(route('strava.connect'))
         ->assertOk()
         ->assertSee('Connecting to Strava', false)
-        ->assertSee(route('dashboard'), false); // interstitial meta-refresh target
+        ->assertSee(route('activities'), false); // interstitial meta-refresh target
 
     $this->assertAuthenticatedAs($marc);
 });
