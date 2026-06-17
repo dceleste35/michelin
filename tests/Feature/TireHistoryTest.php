@@ -54,6 +54,26 @@ it('seeds Marc with a tire swap and preserves per-ride history', function () {
         ->and($marc->stravaActivities()->where('tires_confirmed', false)->count())->toBe(8); // récentes à vérifier
 });
 
+it('verifies and edits the tires of a single ride from the activities cards', function () {
+    test()->seed(ProductCatalogSeeder::class);
+    $user = User::factory()->create();
+    $front = $user->tires()->create(['product_id' => Product::first()->id, 'position' => TirePosition::Front, 'is_active' => true]);
+    $rear = $user->tires()->create(['product_id' => Product::first()->id, 'position' => TirePosition::Rear, 'is_active' => true]);
+    $ride = StravaActivity::factory()->for($user)->create(['tires_confirmed' => false]);
+    $this->actingAs($user);
+
+    Livewire::test('pages::activities')
+        ->call('startEdit', $ride->id)
+        ->set('editFront', $front->id)
+        ->set('editRear', $rear->id)
+        ->call('saveRide');
+
+    $ride->refresh();
+    expect($ride->front_tire_id)->toBe($front->id)
+        ->and($ride->rear_tire_id)->toBe($rear->id)
+        ->and($ride->tires_confirmed)->toBeTrue();
+});
+
 it('shows a verify-tires banner on activities and confirms all', function () {
     $user = User::factory()->create();
     StravaActivity::factory()->count(2)->for($user)->create(['tires_confirmed' => false]);

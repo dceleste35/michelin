@@ -157,5 +157,11 @@
     "No ride recorded on this tire yet.": "Aucune sortie enregistrée sur ce pneu.",
     "Retired": "Retiré",
     "Confirm all": "Tout confirmer",
-    "To verify": "À vérifier"
+    "To verify": "À vérifier",
+    "Verify": "Vérifier",
+    "Edit": "Modifier",
+    "Front tire": "Pneu avant",
+    "Rear tire": "Pneu arrière",
+    "Mounted tires": "Pneus montés",
+    "None": "Aucun"
 }
