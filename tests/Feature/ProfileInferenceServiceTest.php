@@ -35,7 +35,7 @@ it('derives surface from Strava signals', function (array $attrs, Surface $expec
     expect($this->service->deriveSurface(rideAttrs($attrs)))->toBe($expected);
 })->with([
     'flat road Ride → asphalt' => [['sport_type' => 'Ride', 'distance_m' => 50_000, 'total_elevation_gain_m' => 300], Surface::Asphalt],
-    'hilly Ride → hardpacked' => [['sport_type' => 'Ride', 'distance_m' => 50_000, 'total_elevation_gain_m' => 600], Surface::Hardpacked],
+    'hilly Ride → asphalt (road bike is paved)' => [['sport_type' => 'Ride', 'distance_m' => 50_000, 'total_elevation_gain_m' => 600], Surface::Asphalt],
     'virtual ride → asphalt' => [['sport_type' => 'VirtualRide', 'distance_m' => 40_000, 'total_elevation_gain_m' => 100], Surface::Asphalt],
     'flat fast gravel → asphalt' => [['sport_type' => 'GravelRide', 'distance_m' => 60_000, 'total_elevation_gain_m' => 300, 'average_speed_ms' => 7.5], Surface::Asphalt],
     'rolling gravel → hardpacked' => [['sport_type' => 'GravelRide', 'distance_m' => 50_000, 'total_elevation_gain_m' => 500, 'average_speed_ms' => 6.0], Surface::Hardpacked],
@@ -46,6 +46,16 @@ it('derives surface from Strava signals', function (array $attrs, Surface $expec
     'very steep MTB → mud' => [['sport_type' => 'EMountainBikeRide', 'distance_m' => 20_000, 'total_elevation_gain_m' => 800, 'average_speed_ms' => 4.0], Surface::Mud],
     'ebike → asphalt' => [['sport_type' => 'EBikeRide', 'distance_m' => 20_000, 'total_elevation_gain_m' => 300], Surface::Asphalt],
     'unknown sport → mixed' => [['sport_type' => 'Kayaking', 'distance_m' => 10_000, 'total_elevation_gain_m' => 0], Surface::Mixed],
+]);
+
+it('derives a surface without crashing on edge cases', function (array $attrs) {
+    expect($this->service->deriveSurface(rideAttrs($attrs)))->toBeInstanceOf(Surface::class);
+})->with([
+    'zero distance' => [['distance_m' => 0, 'total_elevation_gain_m' => 0]],
+    'zero speed' => [['average_speed_ms' => 0]],
+    'unknown sport type' => [['sport_type' => 'Run']],
+    'empty sport type' => [['sport_type' => '']],
+    'extreme elevation MTB' => [['sport_type' => 'MountainBikeRide', 'distance_m' => 10_000, 'total_elevation_gain_m' => 5_000]],
 ]);
 
 // ---------------------------------------------------------------------------

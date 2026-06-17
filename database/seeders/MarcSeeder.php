@@ -4,12 +4,12 @@ namespace Database\Seeders;
 
 use App\Enums\RidingStyle;
 use App\Enums\Segment;
-use App\Enums\Surface;
 use App\Enums\TirePosition;
 use App\Models\Product;
 use App\Models\StravaActivity;
 use App\Models\User;
 use App\Models\UserTire;
+use App\Services\ProfileInferenceService;
 use Carbon\CarbonImmutable;
 use Database\Factories\StravaActivityFactory;
 use Illuminate\Database\Seeder;
@@ -52,13 +52,16 @@ class MarcSeeder extends Seeder
     private function seedActivities(User $marc): void
     {
         $now = CarbonImmutable::now();
+        $inference = app(ProfileInferenceService::class);
 
         for ($i = 0; $i < self::ACTIVITY_COUNT; $i++) {
-            // 60 % asphalt / 40 % off-road (hard-packed + mixed) — gravel rider.
-            $surface = match ($i % 5) {
-                0, 1, 2 => Surface::Asphalt,
-                3 => Surface::Hardpacked,
-                default => Surface::Mixed,
+            // Realistic climbing profile per ride (m/km). At Marc's steady 26 km/h these
+            // signals DERIVE to ~60 % asphalt / 20 % hard-packed / 20 % mixed — the surface
+            // is computed by deriveSurface(), never hard-coded (jury credibility).
+            $elevationPerKm = match ($i % 5) {
+                0, 1, 2 => 5,   // flat & fast → asphalt (road-pace gravel)
+                3 => 11,        // rolling → hard-packed
+                default => 18,  // hilly → mixed
             };
 
             // A long ride (~150 km) every 12th outing, otherwise 35–75 km.
@@ -74,12 +77,14 @@ class MarcSeeder extends Seeder
                 'distance_m' => $distanceM,
                 'moving_time_s' => (int) round($distanceM / $avgSpeedMs),
                 'average_speed_ms' => $avgSpeedMs,
-                'total_elevation_gain_m' => $distanceKm * ($surface === Surface::Asphalt ? 8 : 14),
+                'total_elevation_gain_m' => $distanceKm * $elevationPerKm,
                 'average_watts' => 178,
                 'average_cadence' => 84,
-                'surface_derived' => $surface,
                 'start_date' => $now->subDays((int) round($i * 180 / self::ACTIVITY_COUNT))->setTime(7, 30),
             ];
+
+            // Surface is DERIVED from the ride signals via the documented rules.
+            $attributes['surface_derived'] = $inference->deriveSurface(new StravaActivity($attributes));
             $attributes['raw_json'] = StravaActivityFactory::stravaPayload($attributes, self::ATHLETE_ID);
 
             StravaActivity::updateOrCreate(

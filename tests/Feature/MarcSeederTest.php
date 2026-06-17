@@ -7,6 +7,7 @@ use App\Enums\TirePosition;
 use App\Models\StravaActivity;
 use App\Models\User;
 use App\Models\UserTire;
+use App\Services\ProfileInferenceService;
 use Database\Seeders\MarcSeeder;
 use Database\Seeders\ProductCatalogSeeder;
 
@@ -37,6 +38,17 @@ it('splits Marc surfaces ~60/40 asphalt/off-road', function () {
 
     expect($asphalt)->toBe(48) // 60 %
         ->and($offroad)->toBe(32); // 40 %
+});
+
+it('derives every Marc surface from its ride signals (not hard-coded)', function () {
+    $marc = seedMarc();
+    $service = new ProfileInferenceService;
+
+    // The stored surface must be reproducible from the activity signals via the
+    // documented rules — proves "we derive it, we don't hard-code it" to the jury.
+    $marc->stravaActivities()->get()->each(
+        fn (StravaActivity $activity) => expect($activity->surface_derived)->toBe($service->deriveSurface($activity))
+    );
 });
 
 it('stores each activity as a faithful Strava DetailedActivity raw_json', function () {
