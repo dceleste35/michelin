@@ -24,7 +24,21 @@
     --color-zinc-950: #0a0a0a;
 
     /* Michelin brand palette — official values (digital charter) */
-    --color-michelin-blue: #27509b;        /* Reference Blue */
+
+    --color-michelin-blue: #27509b;        /* Reference Blue — main "Group" action */
+    --color-michelin-blue-light: #87a4d0;  /* official blue tint — links/accents on dark */
+    --color-michelin-blue-dark: #00205b;   /* secondary Dark Blue */
+    --color-michelin-midnight: #000c34;    /* tertiary Midnight — immersive backgrounds */
+    --color-michelin-yellow: #fce500;      /* Highlighting Yellow — commercial CTA only */
+    --color-michelin-green: #84bd00;       /* secondary Green */
+    --color-michelin-purple: #582c83;      /* secondary Purple */
+    --color-michelin-gray: #53565a;        /* secondary Gray */
+
+    /* Functional / "special" colours (charter) */
+    --color-michelin-success: #2e7d32;
+    --color-michelin-warning: #f9a825;
+    --color-michelin-danger: #b71c1c;
+
     --color-michelin-blue-dark-03: #3A61A6;
     --color-michelin-blue-dark-02: #6182BB;
     --color-michelin-blue-dark-01: #87A4D0; /* Primary blue - Dark 01 (corresponds to old michelin-blue-light) */
@@ -32,16 +46,12 @@
     --color-michelin-blue-light-02: #C1D6EF;
     --color-michelin-blue-light-01: #D4E7FA;
 
-    --color-michelin-yellow: #FCE500;      /* Reference Yellow / Highlighting Yellow */
     --color-michelin-yellow-dark-03: #FCE817;
     --color-michelin-yellow-dark-02: #FDED44;
     --color-michelin-yellow-dark-01: #FDF271;
     --color-michelin-yellow-light-02: #FEF79E;
     --color-michelin-yellow-light-03: #FEF984;
     --color-michelin-yellow-light-01: #FEFCCB;
-
-    /* Maintain alias for backward compatibility */
-    --color-michelin-blue-light: var(--color-michelin-blue-dark-01);
 
     /* Partner */
     --color-strava: #fc4c02;
@@ -64,19 +74,6 @@
     --color-gray-dark-50: #4D4D4D;
     --color-gray-dark-40: #666666;
 
-    /* Special Colors / Alerts & Indicators */
-    --color-valide: #2E7D32;
-    --color-valid-dark: #92C18F;
-    --color-valid-light: #E8F5E5;
-
-    --color-avertissement: #F9A825;
-    --color-warning-dark: #FCD286;
-    --color-warning-light: #FDECC0;
-
-    --color-danger-ou-erreur: #B71C1C;
-    --color-danger: #B71C1C;
-    --color-danger-dark: #dd8880;
-    --color-danger-light: #f4cec2;
 
     --color-accent: var(--color-michelin-blue);
     --color-accent-content: var(--color-michelin-blue);
