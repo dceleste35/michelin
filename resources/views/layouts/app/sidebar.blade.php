@@ -102,6 +102,8 @@
             </flux:toast.group>
         @endpersist
 
+        <x-mobile-bottom-nav />
+
         @fluxScripts
     </body>
 </html>
