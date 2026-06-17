@@ -5,6 +5,16 @@
         <!-- Session Status -->
         <x-auth-session-status class="text-center" :status="session('status')" />
 
+        <!-- Connect with Strava — primary entry (simulated for the prototype) -->
+        <a
+            href="{{ route('strava.connect') }}"
+            class="flex w-full items-center justify-center gap-2 rounded-lg bg-[#FC4C02] px-4 py-2 font-medium text-white transition hover:opacity-90"
+            data-test="strava-connect"
+        >
+            {{ __('Connect with Strava') }}
+        </a>
+
+        <flux:separator :text="__('or sign in with email')" />
 
         <form method="POST" action="{{ route('login.store') }}" class="flex flex-col gap-6">
             @csrf
