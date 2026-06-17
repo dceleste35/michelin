@@ -42,6 +42,15 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     /**
+     * Default attribute values mirroring the database defaults.
+     *
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'segment_overridden' => false,
+    ];
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -50,6 +59,7 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'two_factor_confirmed_at' => 'datetime',
             'password' => 'hashed',
             'segment' => Segment::class,
             'riding_style' => RidingStyle::class,

@@ -24,6 +24,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->index(['user_id', 'is_active']);
+            $table->index('product_id'); // FK lookups (Product → mounted tires)
         });
     }
 
