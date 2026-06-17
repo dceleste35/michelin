@@ -30,7 +30,7 @@ new #[Title('Activities')] class extends Component
 <section class="w-full">
     <flux:heading size="xl" level="1">{{ __('Your activities') }}</flux:heading>
     <flux:subheading size="lg" class="mb-6">
-        {{ $this->activities->total() }} {{ Str::plural('ride', $this->activities->total()) }} {{ __('imported from Strava') }}
+        {{ trans_choice('rides.imported', $this->activities->total(), ['count' => $this->activities->total()]) }}
     </flux:subheading>
     <flux:separator variant="subtle" class="mb-6" />
 
@@ -62,8 +62,8 @@ new #[Title('Activities')] class extends Component
             <flux:table.rows>
                 @foreach ($this->activities as $activity)
                     <flux:table.row :key="$activity->id" data-test="activity-row">
-                        <flux:table.cell>{{ $activity->start_date->format('M j, Y') }}</flux:table.cell>
-                        <flux:table.cell>{{ Str::headline($activity->sport_type) }}</flux:table.cell>
+                        <flux:table.cell>{{ $activity->start_date->translatedFormat('j M Y') }}</flux:table.cell>
+                        <flux:table.cell>{{ __(Str::headline($activity->sport_type)) }}</flux:table.cell>
                         <flux:table.cell>
                             @if ($activity->surface_derived)
                                 <flux:badge size="sm" :color="match ($activity->surface_derived) {
@@ -72,16 +72,16 @@ new #[Title('Activities')] class extends Component
                                     Surface::Mixed => 'lime',
                                     Surface::Soft => 'orange',
                                     Surface::Mud => 'red',
-                                }">{{ $activity->surface_derived->name }}</flux:badge>
+                                }">{{ __($activity->surface_derived->name) }}</flux:badge>
                             @else
                                 <flux:text class="text-zinc-400">&mdash;</flux:text>
                             @endif
                         </flux:table.cell>
                         <flux:table.cell align="end" variant="strong">
-                            {{ number_format($activity->distance_m / 1000, 1) }} km
+                            {{ number_format($activity->distance_m / 1000, 1, ',', ' ') }} km
                         </flux:table.cell>
                         <flux:table.cell align="end">
-                            {{ number_format($activity->total_elevation_gain_m) }} m
+                            {{ number_format($activity->total_elevation_gain_m, 0, ',', ' ') }} m
                         </flux:table.cell>
                     </flux:table.row>
                 @endforeach

@@ -29,11 +29,11 @@ it('lists the rider activities with date, type, distance, elevation and surface'
     $this->actingAs($user);
 
     Livewire::test('pages::activities')
-        ->assertSee('Mar 15, 2026')   // date
-        ->assertSee('Gravel Ride')    // humanised type
-        ->assertSee('42.2 km')        // distance in km
-        ->assertSee('1,234 m')        // elevation
-        ->assertSee('Mixed');         // surface badge
+        ->assertSee('15 Mar 2026')    // localised date (en test locale)
+        ->assertSee('Gravel Ride')    // humanised, translatable type
+        ->assertSee('42,2 km')        // distance, FR number format
+        ->assertSee('1 234 m')        // elevation, FR number format
+        ->assertSee('Mixed');         // surface badge, translatable
 });
 
 it('only shows the authenticated rider own activities', function () {
@@ -46,8 +46,8 @@ it('only shows the authenticated rider own activities', function () {
     $this->actingAs($marc);
 
     Livewire::test('pages::activities')
-        ->assertSee('10.0 km')
-        ->assertDontSee('99.0 km');
+        ->assertSee('10,0 km')
+        ->assertDontSee('99,0 km');
 });
 
 it('shows an empty state when the rider has no activities', function () {
@@ -81,7 +81,7 @@ it('paginates activities at 20 per page, most recent first', function () {
 
     Livewire::test('pages::activities')
         ->assertSee('21 rides imported from Strava')
-        ->assertDontSee('9,999 m')           // hidden on page 1
+        ->assertDontSee('9 999 m')           // hidden on page 1
         ->call('gotoPage', 2)
-        ->assertSee('9,999 m');              // visible on page 2
+        ->assertSee('9 999 m');              // visible on page 2
 });
