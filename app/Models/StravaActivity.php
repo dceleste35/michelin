@@ -16,6 +16,7 @@ use Illuminate\Support\Carbon;
  * @property int $user_id
  * @property string $external_id
  * @property string $sport_type
+ * @property string|null $gear_id
  * @property int $distance_m
  * @property int $moving_time_s
  * @property string $average_speed_ms
@@ -30,6 +31,7 @@ use Illuminate\Support\Carbon;
     'user_id',
     'external_id',
     'sport_type',
+    'gear_id',
     'distance_m',
     'moving_time_s',
     'average_speed_ms',

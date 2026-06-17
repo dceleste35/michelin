@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('external_id');
             $table->string('sport_type');
+            $table->string('gear_id')->nullable()->index(); // Strava gear (bike) → tire attribution
 
             // Métriques Strava
             $table->unsignedInteger('distance_m');

@@ -39,15 +39,34 @@ it('splits Marc surfaces ~60/40 asphalt/off-road', function () {
         ->and($offroad)->toBe(32); // 40 %
 });
 
-it('stores each activity as a Strava-API-shaped raw_json', function () {
+it('stores each activity as a faithful Strava DetailedActivity raw_json', function () {
     $marc = seedMarc();
-    $first = $marc->stravaActivities()->where('external_id', 'marc-1')->sole();
+    $first = $marc->stravaActivities()->orderBy('id')->first();
 
     expect($first->raw_json)->toBeArray()
         ->and($first->raw_json['athlete']['id'])->toBe(42)
         ->and($first->raw_json['sport_type'])->toBe('GravelRide')
-        ->and($first->raw_json['distance'])->toBe($first->distance_m)
+        ->and($first->raw_json['type'])->toBe('Ride')
+        ->and($first->raw_json['distance'])->toEqual($first->distance_m)
+        ->and($first->raw_json['name'])->toBeString()
+        ->and($first->raw_json['start_date_local'])->toBeString()
+        ->and($first->raw_json['map']['summary_polyline'])->toBeString()
+        ->and($first->raw_json['gear_id'])->toBe($first->gear_id)
+        ->and($first->raw_json['gear']['id'])->toBe($first->gear_id)
+        ->and($first->raw_json['gear']['distance'])->toBeGreaterThan(0)
         ->and($first->raw_json['_derived']['surface'])->toBe($first->surface_derived->value);
+});
+
+it('attributes every Marc activity to a single bike (gear) for tire tracking', function () {
+    $marc = seedMarc();
+
+    $gearIds = $marc->stravaActivities()->pluck('gear_id');
+    $odometerM = $marc->stravaActivities()->orderBy('id')->first()->raw_json['gear']['distance'];
+
+    expect($gearIds)->toHaveCount(80)
+        ->and($gearIds->unique()->values()->all())->toBe(['b9100042'])
+        // Bike odometer is past the tire-mount baseline (1200 km) → wear is computable.
+        ->and($odometerM)->toBeGreaterThan(1200 * 1000);
 });
 
 it('mounts a worn Power Gravel (rear 86 %, active) on Marc', function () {
@@ -74,8 +93,9 @@ it('factory builds a gravel activity with raw_json consistent with its columns',
     $activity = StravaActivity::factory()->create();
 
     expect($activity->sport_type)->toBe('GravelRide')
-        ->and($activity->raw_json['distance'])->toBe($activity->distance_m)
-        ->and($activity->raw_json['moving_time'])->toBe($activity->moving_time_s)
+        ->and($activity->raw_json['distance'])->toEqual($activity->distance_m)
+        ->and($activity->raw_json['moving_time'])->toEqual($activity->moving_time_s)
         ->and($activity->raw_json['_derived']['surface'])->toBe($activity->surface_derived->value)
-        ->and($activity->raw_json['athlete']['id'])->toBeInt();
+        ->and($activity->raw_json['athlete']['id'])->toBeInt()
+        ->and($activity->raw_json['gear_id'])->toBe($activity->gear_id);
 });

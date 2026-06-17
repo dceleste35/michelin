@@ -26,6 +26,10 @@ class MarcSeeder extends Seeder
 
     private const ATHLETE_ID = 42;
 
+    private const ACTIVITY_BASE_ID = 15_000_000_000;
+
+    private const GEAR_ID = 'b9100042'; // Marc's single gravel bike (Strava gear id)
+
     public function run(): void
     {
         $marc = User::updateOrCreate(
@@ -61,10 +65,11 @@ class MarcSeeder extends Seeder
             $distanceKm = $i % 12 === 0 ? 150 : 35 + ($i * 7 % 41);
             $distanceM = $distanceKm * 1000;
             $avgSpeedMs = 7.2; // ~26 km/h, steady endurance pace
-            $externalId = 'marc-'.($i + 1);
+            $externalId = (string) (self::ACTIVITY_BASE_ID + $i);
 
             $attributes = [
                 'external_id' => $externalId,
+                'gear_id' => self::GEAR_ID,
                 'sport_type' => 'GravelRide',
                 'distance_m' => $distanceM,
                 'moving_time_s' => (int) round($distanceM / $avgSpeedMs),
