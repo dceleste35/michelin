@@ -14,15 +14,26 @@ it('shows the Connect with Strava button on the login page', function () {
         ->assertSee(route('strava.connect'), false);
 });
 
-it('simulated connect signs in as Marc and shows the Strava interstitial', function () {
-    $marc = seedDemoMarc();
+it('first connect signs in as Marc and routes to the onboarding smart default', function () {
+    $marc = seedDemoMarc(); // profile_confirmed_at null → first time
 
     $this->get(route('strava.connect'))
         ->assertOk()
         ->assertSee('Connecting to Strava', false)
-        ->assertSee(route('activities'), false); // interstitial meta-refresh target
+        ->assertSee(route('profile'), false); // onboarding target
 
     $this->assertAuthenticatedAs($marc);
+});
+
+it('connect skips onboarding and goes to activities once the profile is confirmed', function () {
+    $marc = seedDemoMarc();
+    $marc->profile_confirmed_at = now();
+    $marc->save();
+
+    $this->get(route('strava.connect'))
+        ->assertOk()
+        ->assertSee(route('activities'), false)   // straight to activities
+        ->assertDontSee(route('profile'), false); // no longer re-asks
 });
 
 it('connect errors and stays guest when the demo profile is not seeded', function () {

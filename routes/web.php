@@ -10,6 +10,7 @@ Route::get('auth/strava/connect', [StravaController::class, 'connect'])->name('s
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::view('dashboard', 'dashboard')->name('dashboard');
+    Route::livewire('profile', 'pages::profile')->name('profile');
     Route::livewire('activities', 'pages::activities')->name('activities');
 });
 

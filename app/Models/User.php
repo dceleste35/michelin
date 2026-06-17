@@ -31,6 +31,7 @@ use Illuminate\Support\Str;
  * @property Segment|null $segment
  * @property bool $segment_overridden
  * @property RidingStyle|null $riding_style
+ * @property Carbon|null $profile_confirmed_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
@@ -64,6 +65,7 @@ class User extends Authenticatable
             'segment' => Segment::class,
             'riding_style' => RidingStyle::class,
             'segment_overridden' => 'boolean',
+            'profile_confirmed_at' => 'datetime',
         ];
     }
 

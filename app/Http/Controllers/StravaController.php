@@ -20,7 +20,9 @@ class StravaController extends Controller
      * We do NOT call Strava: real accounts have no usable ride history, so the
      * connection is faked — we sign in as the seeded hero (Marc) whose
      * representative mock rides are what the app analyses, and show a short
-     * Strava-style interstitial before landing on the dashboard.
+     * Strava-style interstitial. First connection lands on the smart-default
+     * onboarding; once the profile is confirmed, later connections skip straight
+     * to the activities (the profile stays editable from the sidebar).
      */
     public function connect(): View|RedirectResponse
     {
@@ -34,6 +36,10 @@ class StravaController extends Controller
 
         Auth::login($marc);
 
-        return view('strava.connecting');
+        $target = $marc->profile_confirmed_at !== null
+            ? route('activities')
+            : route('profile');
+
+        return view('strava.connecting', ['target' => $target]);
     }
 }
