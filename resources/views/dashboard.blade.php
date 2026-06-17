@@ -1,18 +1,31 @@
 <x-layouts::app :title="__('Dashboard')">
-    <div class="flex h-full w-full flex-1 flex-col gap-4 rounded-xl">
-        <div class="grid auto-rows-min gap-4 md:grid-cols-3">
-            <div class="relative aspect-video overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700">
-                <x-placeholder-pattern class="absolute inset-0 size-full stroke-gray-900/20 dark:stroke-neutral-100/20" />
-            </div>
-            <div class="relative aspect-video overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700">
-                <x-placeholder-pattern class="absolute inset-0 size-full stroke-gray-900/20 dark:stroke-neutral-100/20" />
-            </div>
-            <div class="relative aspect-video overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700">
-                <x-placeholder-pattern class="absolute inset-0 size-full stroke-gray-900/20 dark:stroke-neutral-100/20" />
-            </div>
+    <div class="flex h-full w-full flex-1 flex-col gap-6 rounded-xl">
+        <!-- Title and description -->
+        <div class="flex flex-col gap-1.5">
+            <h2 class="text-xl font-black text-zinc-800 dark:text-zinc-100 tracking-tight flex items-center gap-2">
+                <span class="inline-block w-2 h-5 bg-accent rounded-full"></span>
+                {{ __('Mes Équipements') }}
+            </h2>
+            <p class="text-xs text-zinc-500 dark:text-zinc-400">
+                {{ __('Suivi en temps réel de l\'usure et des performances de vos pneus vélo Michelin.') }}
+            </p>
         </div>
-        <div class="relative h-full flex-1 overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700">
-            <x-placeholder-pattern class="absolute inset-0 size-full stroke-gray-900/20 dark:stroke-neutral-100/20" />
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
+            <!-- Tire Wear Card Component -->
+            <livewire:tire-wear-card />
+        </div>
+
+        <!-- Connection banner -->
+        <div class="relative overflow-hidden rounded-2xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-zinc-900 p-6 shadow-xs">
+            <div class="flex flex-col items-center justify-center text-center gap-4 max-w-md mx-auto">
+                <h3 class="text-base font-bold text-zinc-800 dark:text-zinc-200">{{ __('Connectez vos activités cyclistes') }}</h3>
+                <p class="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                    {{ __('Associez votre compte Strava pour synchroniser vos sorties vélo et analyser vos performances avec vos pneus Michelin.') }}
+                </p>
+                <x-strava-button href="#" />
+            </div>
         </div>
     </div>
 </x-layouts::app>
+
