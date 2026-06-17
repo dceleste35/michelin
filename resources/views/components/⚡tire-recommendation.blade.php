@@ -191,7 +191,7 @@ new class extends Component {
         <div class="min-w-[620px] grid grid-cols-4 gap-4 text-xs">
             <!-- Left Header Row Titles -->
             <div class="flex flex-col justify-between py-2 text-zinc-400 dark:text-zinc-500 font-bold uppercase tracking-wider text-[9px] gap-6">
-                <div class="h-20 flex items-center">{{ __('Modèle') }}</div>
+                <div class="h-32 flex items-center">{{ __('Modèle') }}</div>
                 <div class="border-t border-zinc-200/50 dark:border-zinc-800/50 pt-2.5">{{ __('Indice d\'Adéquation') }}</div>
                 <div class="border-t border-zinc-200/50 dark:border-zinc-800/50 pt-2.5">{{ __('Section ETRTO') }}</div>
                 <div class="border-t border-zinc-200/50 dark:border-zinc-800/50 pt-2.5">{{ __('Prix Public') }}</div>
@@ -220,10 +220,19 @@ new class extends Component {
                     @endif
 
                     <!-- Product Image & Name -->
-                    <div class="h-20 flex flex-col gap-1">
-                        <span class="text-[8px] uppercase font-black text-zinc-400 tracking-wider">Michelin</span>
-                        <h4 class="font-extrabold text-xs text-zinc-800 dark:text-zinc-100 leading-tight">{{ $product->web_range_name }}</h4>
-                        <span class="text-[9px] text-zinc-500 font-bold mt-0.5">{{ $product->width_etrto }}-{{ $product->diameter_etrto }}</span>
+                    <div class="h-32 flex flex-col gap-2">
+                        <div class="h-14 w-full bg-zinc-950 rounded-lg overflow-hidden flex items-center justify-center border border-zinc-200/50 dark:border-zinc-800/80">
+                            <img 
+                                src="{{ $product->image_url ?? asset('images/michelin_bike_tire.jpg') }}" 
+                                alt="{{ $product->web_range_name }}"
+                                class="h-full w-full object-cover opacity-85"
+                            />
+                        </div>
+                        <div class="flex flex-col gap-0.5">
+                            <span class="text-[8px] uppercase font-black text-zinc-400 tracking-wider">Michelin</span>
+                            <h4 class="font-extrabold text-[11px] text-zinc-800 dark:text-zinc-100 leading-tight line-clamp-1">{{ $product->web_range_name }}</h4>
+                            <span class="text-[9px] text-zinc-500 font-bold">{{ $product->width_etrto }}-{{ $product->diameter_etrto }}</span>
+                        </div>
                     </div>
 
                     <!-- Match Score Badge -->
@@ -277,8 +286,8 @@ new class extends Component {
                         {{ $mock['description'] }}
                     </div>
 
-                    <!-- Mount Button -->
-                    <div class="border-t border-zinc-100 dark:border-zinc-850 pt-2.5 mt-auto">
+                    <!-- Action Buttons -->
+                    <div class="border-t border-zinc-100 dark:border-zinc-850 pt-2.5 mt-auto flex flex-col gap-2">
                         <flux:button 
                             size="xs" 
                             variant="{{ $isBest ? 'primary' : 'outline' }}" 
@@ -286,6 +295,17 @@ new class extends Component {
                             class="w-full font-bold"
                         >
                             {{ __('Monter ce pneu') }}
+                        </flux:button>
+                        
+                        <flux:button 
+                            size="xs" 
+                            variant="subtle"
+                            href="https://www.decathlon.fr/search?Ntt=michelin+{{ urlencode($product->web_range_name) }}"
+                            target="_blank"
+                            icon="shopping-cart"
+                            class="w-full font-bold text-zinc-650 dark:text-zinc-350"
+                        >
+                            {{ __('Acheter partenaire') }}
                         </flux:button>
                     </div>
                 </div>

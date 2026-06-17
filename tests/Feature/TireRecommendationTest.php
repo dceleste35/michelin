@@ -24,7 +24,9 @@ test('displays mock performance indicators', function () {
         ->assertSee('96%')
         ->assertSee('Recommandé pour vous')
         ->assertSee('Idéal pour vos performances Strava')
-        ->assertSee('59,90 €');
+        ->assertSee('59,90 €')
+        ->assertSee('Acheter partenaire')
+        ->assertSee('michelin_bike_tire.jpg');
 });
 
 test('mounting a tire updates the active tire in database and dispatches event', function () {
