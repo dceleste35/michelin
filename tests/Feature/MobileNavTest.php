@@ -18,3 +18,12 @@ it('shows the mobile bottom navigation to authenticated users', function () {
 it('does not show the app navigation to guests', function () {
     $this->get(route('login'))->assertDontSee('data-test="mobile-bottom-nav"', false);
 });
+
+it('uses a clean mobile top bar without the web hamburger', function () {
+    $this->actingAs(User::factory()->create());
+
+    $this->get(route('activities'))
+        ->assertOk()
+        ->assertSee('michelin-logo.png', false) // logo Michelin dans la top-bar mobile
+        ->assertDontSee('bars-2', false);        // plus de bouton hamburger web
+});
