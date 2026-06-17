@@ -3,6 +3,7 @@
     $tabs = [
         ['route' => 'dashboard', 'icon' => 'home', 'label' => __('Home')],
         ['route' => 'activities', 'icon' => 'map', 'label' => __('Activities')],
+        ['route' => 'tires', 'icon' => 'lifebuoy', 'label' => __('Tires')],
         ['route' => 'profile', 'icon' => 'identification', 'label' => __('Profile')],
     ];
 @endphp
