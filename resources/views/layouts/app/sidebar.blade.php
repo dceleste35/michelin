@@ -18,6 +18,9 @@
                     <flux:sidebar.item icon="map" :href="route('activities')" :current="request()->routeIs('activities')" wire:navigate>
                         {{ __('Activities') }}
                     </flux:sidebar.item>
+                    <flux:sidebar.item icon="identification" :href="route('profile')" :current="request()->routeIs('profile')" wire:navigate>
+                        {{ __('Rider profile') }}
+                    </flux:sidebar.item>
                 </flux:sidebar.group>
             </flux:sidebar.nav>
 

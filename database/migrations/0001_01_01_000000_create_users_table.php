@@ -25,6 +25,7 @@ return new class extends Migration
             $table->enum('segment', ['GRAVEL', 'ROAD', 'MTB', 'EBIKE_URBAN'])->nullable();
             $table->boolean('segment_overridden')->default(false);
             $table->enum('riding_style', ['ENDURANCE', 'AGGRESSIF'])->nullable();
+            $table->timestamp('profile_confirmed_at')->nullable(); // smart-default onboarding validated once
 
             $table->timestamps();
         });
