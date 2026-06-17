@@ -4,10 +4,25 @@ use Livewire\Component;
 use App\Models\UserTire;
 use App\Models\Product;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\On;
 
 new class extends Component {
     public ?UserTire $userTire = null;
     public int $simulatedKm = 50;
+
+    /**
+     * Refresh the active tire when a new one is mounted.
+     */
+    #[On('tire-mounted')]
+    public function refreshTire(): void
+    {
+        $user = Auth::user();
+        if ($user) {
+            $this->userTire = $user->tires()->active()->first()
+                ?? $user->tires()->first()
+                ?? $this->createMockTireForUser($user);
+        }
+    }
 
     /**
      * Mount the component.

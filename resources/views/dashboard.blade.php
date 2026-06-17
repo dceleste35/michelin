@@ -11,9 +11,16 @@
             </p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
             <!-- Tire Wear Card Component -->
-            <livewire:tire-wear-card />
+            <div class="lg:col-span-1">
+                <livewire:tire-wear-card />
+            </div>
+
+            <!-- Tire Recommendation & Comparison Component -->
+            <div class="lg:col-span-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-5 shadow-sm">
+                <livewire:tire-recommendation />
+            </div>
         </div>
 
         <!-- Connection banner -->
