@@ -172,7 +172,7 @@ new class extends Component {
 
 <div class="flex flex-col gap-5">
     <!-- Header explaining the mock algorithm -->
-    <div class="p-4 bg-gradient-to-br from-michelin-blue/10 to-michelin-midnight/5 dark:from-michelin-blue/20 dark:to-michelin-midnight/20 rounded-2xl border border-michelin-blue/10 dark:border-michelin-blue/20 flex flex-col gap-2">
+    <div class="p-4 bg-gradient-to-br from-michelin-blue/10 to-michelin-blue-dark-03/5 dark:from-michelin-blue/20 dark:to-michelin-blue-dark-03/20 rounded-2xl border border-michelin-blue/10 dark:border-michelin-blue/20 flex flex-col gap-2">
         <div class="flex items-center gap-2">
             <span class="p-1.5 bg-accent/15 dark:bg-accent/20 rounded-lg text-accent dark:text-michelin-blue-light">
                 <flux:icon icon="bolt" class="size-4" />
@@ -380,7 +380,7 @@ new class extends Component {
 
                     <!-- Compound & casing -->
                     <div class="border-t border-zinc-100 dark:border-zinc-850 pt-2.5">
-                        <flux:badge size="sm" variant="success" class="font-bold text-[8px] uppercase tracking-wider text-green-700 dark:text-green-400">{{ $product->rubber_tech }}</flux:badge>
+                        <flux:badge size="sm" color="green" class="font-bold text-[8px] uppercase tracking-wider text-green-700 dark:text-green-400">{{ $product->rubber_tech }}</flux:badge>
                     </div>
 
                     <!-- Description advice -->

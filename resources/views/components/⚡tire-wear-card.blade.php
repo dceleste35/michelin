@@ -9,6 +9,7 @@ use Livewire\Attributes\On;
 new class extends Component {
     public ?UserTire $userTire = null;
     public int $simulatedKm = 50;
+    public string $activePosition = 'REAR';
 
     /**
      * Refresh the active tire when a new one is mounted.
@@ -16,12 +17,8 @@ new class extends Component {
     #[On('tire-mounted')]
     public function refreshTire(): void
     {
-        $user = Auth::user();
-        if ($user) {
-            $this->userTire = $user->tires()->active()->first()
-                ?? $user->tires()->first()
-                ?? $this->createMockTireForUser($user);
-        }
+        $this->activePosition = 'REAR';
+        $this->loadTire();
     }
 
     /**
@@ -31,21 +28,43 @@ new class extends Component {
     {
         if ($userTire) {
             $this->userTire = $userTire;
+            $this->activePosition = $userTire->position->value;
         } else {
-            // Find the first active tire of the user, or create/fetch a mock one for demonstration
-            $user = Auth::user();
-            if ($user) {
-                $this->userTire = $user->tires()->active()->first()
-                    ?? $user->tires()->first()
-                    ?? $this->createMockTireForUser($user);
-            }
+            $this->loadTire();
         }
+    }
+
+    /**
+     * Load the tire for the current position.
+     */
+    public function loadTire(): void
+    {
+        $user = Auth::user();
+        if ($user) {
+            $this->userTire = $user->tires()
+                ->active()
+                ->where('position', $this->activePosition)
+                ->first()
+                ?? $user->tires()
+                    ->where('position', $this->activePosition)
+                    ->first()
+                    ?? $this->createMockTireForUser($user, $this->activePosition);
+        }
+    }
+
+    /**
+     * Set the viewed tire position (FRONT or REAR).
+     */
+    public function setPosition(string $position): void
+    {
+        $this->activePosition = $position;
+        $this->loadTire();
     }
 
     /**
      * Create a mock tire mount if the user doesn't have any tires registered.
      */
-    protected function createMockTireForUser(App\Models\User $user): UserTire
+    protected function createMockTireForUser(App\Models\User $user, string $position = 'REAR'): UserTire
     {
         $product = Product::first() ?? Product::create([
             'global_id' => 'MIC-PWR-GRVL',
@@ -57,13 +76,15 @@ new class extends Component {
             'image_url' => '/images/michelin_bike_tire.jpg',
         ]);
 
+        $wear = $position === 'FRONT' ? 18.00 : 32.00;
+
         return UserTire::create([
             'user_id' => $user->id,
             'product_id' => $product->id,
-            'position' => \App\Enums\TirePosition::Rear,
+            'position' => $position === 'FRONT' ? \App\Enums\TirePosition::Front : \App\Enums\TirePosition::Rear,
             'mounted_at' => now()->subMonths(4),
             'mounted_odometer_km' => 1500,
-            'wear_percent' => 32.00,
+            'wear_percent' => $wear,
             'is_active' => true,
         ]);
     }
@@ -103,27 +124,14 @@ new class extends Component {
     }
 
     /**
-     * Rotate the tire position (Front <-> Rear).
+     * Add simulated mileage from the slider value.
      */
-    public function rotateTire(): void
+    public function addSimulatedKm(): void
     {
-        if (!$this->userTire) {
-            return;
+        if ($this->simulatedKm > 0) {
+            $this->simulateRide($this->simulatedKm);
+            $this->simulatedKm = 50; // reset to default value
         }
-
-        $newPosition = $this->userTire->position === \App\Enums\TirePosition::Front
-            ? \App\Enums\TirePosition::Rear
-            : \App\Enums\TirePosition::Front;
-
-        $this->userTire->position = $newPosition;
-        $this->userTire->save();
-
-        Flux::toast(
-            variant: 'success',
-            text: __('Pneu permuté vers la position :position !', [
-                'position' => $newPosition === \App\Enums\TirePosition::Front ? __('avant') : __('arrière')
-            ]),
-        );
     }
 
     /**
@@ -165,12 +173,12 @@ new class extends Component {
     {
         $wear = $this->userTire->wear_percent ?? 0;
         if ($wear >= 80) {
-            return 'red';
+            return 'critical';
         }
         if ($wear >= 50) {
-            return 'orange';
+            return 'moderate';
         }
-        return 'green';
+        return 'excellent';
     }
 
     /**
@@ -189,22 +197,72 @@ new class extends Component {
     }
 
     /**
-     * Get the Flux badge variant based on wear level.
+     * Get the high-contrast Tailwind classes for the status badge using digital charter colors.
      */
-    public function getStatusBadgeVariant(): string
+    public function getWearBadgeClasses(): string
     {
         $wear = $this->userTire->wear_percent ?? 0;
         if ($wear >= 80) {
-            return 'danger';
+            return 'bg-michelin-yellow dark:bg-michelin-yellow-dark-03 text-zinc-950 font-bold uppercase tracking-wider text-[9px] px-2.5 py-1 shadow-sm rounded-md';
         }
         if ($wear >= 50) {
-            return 'warning';
+            return 'bg-michelin-yellow-dark-02 dark:bg-michelin-yellow-light-03 text-zinc-950 font-bold uppercase tracking-wider text-[9px] px-2.5 py-1 shadow-sm rounded-md';
         }
-        return 'success';
+        return 'bg-michelin-blue dark:bg-michelin-blue-dark-01 text-white font-bold uppercase tracking-wider text-[9px] px-2.5 py-1 shadow-sm rounded-md';
     }
 }; ?>
 
 <div class="w-full max-w-md mx-auto bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl">
+    <style>
+        @keyframes tire-fade-in {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        @keyframes tire-slide-up {
+            from {
+                transform: translateY(12px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        @keyframes tire-draw-radial {
+            from {
+                stroke-dasharray: 0, 100;
+            }
+            to {
+                stroke-dasharray: var(--wear-percent), 100;
+            }
+        }
+        @keyframes tire-progress-grow {
+            from {
+                width: 0%;
+            }
+            to {
+                width: var(--wear-width);
+            }
+        }
+
+        .animate-tire-fade {
+            animation: tire-fade-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .animate-tire-slide {
+            animation: tire-slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .animate-tire-radial {
+            animation: tire-draw-radial 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+        .animate-tire-progress {
+            animation: tire-progress-grow 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+    </style>
+
     <!-- Image Header with Gradient & Overlay -->
     <div class="relative h-48 w-full bg-zinc-950 flex items-center justify-center overflow-hidden">
         <!-- Radial background glow -->
@@ -220,31 +278,32 @@ new class extends Component {
                 <!-- Fork / Handlebars -->
                 <path d="M 70,35 L 75,12 L 68,12" />
                 <!-- Rear Wheel -->
-                <circle cx="30" cy="35" r="10" class="{{ $this->userTire->position === \App\Enums\TirePosition::Rear ? 'stroke-accent animate-pulse stroke-[3.5px]' : 'stroke-zinc-650 dark:stroke-zinc-700' }}" />
+                <circle cx="30" cy="35" r="10" class="transition-all duration-300 {{ $activePosition === 'REAR' ? 'stroke-accent animate-pulse stroke-[3.5px]' : 'stroke-zinc-600 dark:stroke-zinc-700 stroke-[2.5px]' }}" />
                 <!-- Front Wheel -->
-                <circle cx="70" cy="35" r="10" class="{{ $this->userTire->position === \App\Enums\TirePosition::Front ? 'stroke-accent animate-pulse stroke-[3.5px]' : 'stroke-zinc-650 dark:stroke-zinc-700' }}" />
+                <circle cx="70" cy="35" r="10" class="transition-all duration-300 {{ $activePosition === 'FRONT' ? 'stroke-accent animate-pulse stroke-[3.5px]' : 'stroke-zinc-600 dark:stroke-zinc-700 stroke-[2.5px]' }}" />
             </svg>
             <span class="text-[10px] font-extrabold uppercase tracking-wider text-white">
-                {{ $this->userTire->position === \App\Enums\TirePosition::Front ? __('Avant') : __('Arrière') }}
+                {{ $activePosition === 'FRONT' ? __('Avant') : __('Arrière') }}
             </span>
         </div>
 
         <!-- Wear status badge -->
-        <div class="absolute top-4 right-4 z-10">
-            <flux:badge size="sm" variant="{{ $this->getStatusBadgeVariant() }}" class="font-bold uppercase tracking-wider text-[9px] px-2 py-0.5 shadow-sm">
+        <div wire:key="tire-badge-{{ $this->userTire->id }}" class="absolute top-4 right-4 z-10 animate-tire-fade">
+            <span class="{{ $this->getWearBadgeClasses() }}">
                 {{ $this->getWearStatusLabel() }}
-            </flux:badge>
+            </span>
         </div>
 
         <!-- Premium Tire Image -->
         <img 
+            wire:key="tire-image-{{ $this->userTire->id }}"
             src="{{ $this->userTire->product->image_url ?? asset('images/michelin_bike_tire.jpg') }}" 
             alt="Michelin Tire Product Shot" 
-            class="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
+            class="h-full w-full object-cover transition-transform duration-500 hover:scale-105 animate-tire-fade"
         />
 
         <!-- Title / Brand Banner at the bottom of image -->
-        <div class="absolute bottom-4 left-4 right-4 text-white z-10 flex items-end justify-between">
+        <div wire:key="tire-title-{{ $this->userTire->id }}" class="absolute bottom-4 left-4 right-4 text-white z-10 flex items-end justify-between animate-tire-slide">
             <div class="flex flex-col gap-0.5">
                 <span class="text-[9px] uppercase font-bold tracking-widest text-michelin-blue-light dark:text-zinc-400">MICHELIN COLOURED TREADS</span>
                 <h3 class="text-base font-black tracking-tight leading-tight drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
@@ -260,8 +319,30 @@ new class extends Component {
 
     <!-- Details and Progress Section -->
     <div class="p-5 flex flex-col gap-5 bg-white dark:bg-zinc-900">
+        <!-- Position Selector Tabs -->
+        <div class="flex bg-zinc-50 dark:bg-zinc-950 p-1 rounded-xl border border-zinc-150 dark:border-zinc-800/80">
+            <button 
+                type="button" 
+                wire:click="setPosition('FRONT')"
+                class="flex-1 py-1.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all duration-300 {{ $activePosition === 'FRONT' 
+                    ? 'bg-white dark:bg-zinc-850 text-accent dark:text-michelin-blue-light shadow-xs border border-zinc-200/20 dark:border-zinc-700/30' 
+                    : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-350' }}"
+            >
+                {{ __('Pneu Avant') }}
+            </button>
+            <button 
+                type="button" 
+                wire:click="setPosition('REAR')"
+                class="flex-1 py-1.5 text-xs font-black uppercase tracking-wider rounded-lg transition-all duration-300 {{ $activePosition === 'REAR' 
+                    ? 'bg-white dark:bg-zinc-850 text-accent dark:text-michelin-blue-light shadow-xs border border-zinc-200/20 dark:border-zinc-700/30' 
+                    : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-350' }}"
+            >
+                {{ __('Pneu Arrière') }}
+            </button>
+        </div>
+
         <!-- Wear metrics overview -->
-        <div class="flex items-center justify-between">
+        <div wire:key="tire-metrics-{{ $this->userTire->id }}" class="flex items-center justify-between">
             <div class="flex flex-col">
                 <span class="text-[10px] uppercase font-bold tracking-wider text-zinc-400 dark:text-zinc-500">{{ __('Kilométrage actuel') }}</span>
                 <span class="text-2xl font-black text-zinc-800 dark:text-zinc-100 tracking-tight">
@@ -277,14 +358,23 @@ new class extends Component {
                     <!-- Circle Bar -->
                     @php
                         $colorClass = match($this->getWearColor()) {
-                            'red' => 'stroke-red-500 dark:stroke-red-400',
-                            'orange' => 'stroke-amber-500 dark:stroke-amber-400',
-                            default => 'stroke-emerald-500 dark:stroke-emerald-400'
+                            'critical' => 'stroke-michelin-yellow dark:stroke-michelin-yellow-dark-03',
+                            'moderate' => 'stroke-michelin-yellow-dark-02 dark:stroke-michelin-yellow-light-03',
+                            default => 'stroke-michelin-blue dark:stroke-michelin-blue-dark-01'
                         };
                     @endphp
-                    <path class="{{ $colorClass }} transition-all duration-500" stroke-width="3.5" stroke-dasharray="{{ $this->userTire->wear_percent }}, 100" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    <path 
+                        wire:key="tire-radial-{{ $this->userTire->id }}"
+                        class="{{ $colorClass }} animate-tire-radial" 
+                        style="--wear-percent: {{ $this->userTire->wear_percent }}"
+                        stroke-width="3.5" 
+                        stroke-linecap="round" 
+                        stroke="currentColor" 
+                        fill="none" 
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
+                    />
                 </svg>
-                <div class="absolute flex flex-col items-center justify-center">
+                <div wire:key="tire-wear-pct-{{ $this->userTire->id }}" class="absolute flex flex-col items-center justify-center animate-tire-slide">
                     <span class="text-sm font-black text-zinc-800 dark:text-zinc-100 leading-none">{{ number_format($this->userTire->wear_percent, 0) }}%</span>
                     <span class="text-[7px] uppercase tracking-widest font-extrabold text-zinc-400 mt-0.5 leading-none">{{ __('Usure') }}</span>
                 </div>
@@ -302,12 +392,16 @@ new class extends Component {
             <div class="h-4 w-full bg-zinc-100 dark:bg-zinc-950/60 rounded-full p-0.5 overflow-hidden border border-zinc-200/40 dark:border-zinc-800/40">
                 @php
                     $barGradient = match($this->getWearColor()) {
-                        'red' => 'bg-gradient-to-r from-red-500 via-rose-500 to-red-600 shadow-[0_0_8px_rgba(239,68,68,0.2)]',
-                        'orange' => 'bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 shadow-[0_0_8px_rgba(245,158,11,0.2)]',
-                        default => 'bg-gradient-to-r from-emerald-500 via-teal-500 to-green-600 shadow-[0_0_8px_rgba(16,185,129,0.2)]'
+                        'critical' => 'bg-gradient-to-r from-michelin-yellow to-michelin-yellow-dark-03 shadow-[0_0_8px_rgba(252,229,0,0.2)]',
+                        'moderate' => 'bg-gradient-to-r from-michelin-yellow-dark-02 to-michelin-yellow-dark-01 shadow-[0_0_8px_rgba(253,237,68,0.2)]',
+                        default => 'bg-gradient-to-r from-michelin-blue to-michelin-blue-dark-02 shadow-[0_0_8px_rgba(39,80,155,0.2)]'
                     };
                 @endphp
-                <div class="h-full rounded-full transition-all duration-500 {{ $barGradient }} flex items-center justify-end pr-1.5 text-[8px] text-white font-black" style="width: {{ min(100, $this->userTire->wear_percent) }}%">
+                <div 
+                    wire:key="tire-bar-{{ $this->userTire->id }}"
+                    class="h-full rounded-full {{ $barGradient }} flex items-center justify-end pr-1.5 text-[8px] text-white font-black whitespace-nowrap animate-tire-progress" 
+                    style="--wear-width: {{ min(100, $this->userTire->wear_percent) }}%"
+                >
                     @if($this->userTire->wear_percent > 12)
                         {{ number_format($this->userTire->wear_percent, 0) }}%
                     @endif
@@ -316,7 +410,7 @@ new class extends Component {
         </div>
 
         <!-- Info Grid -->
-        <div class="grid grid-cols-2 gap-3 bg-zinc-50 dark:bg-zinc-950/40 p-3.5 rounded-xl border border-zinc-100 dark:border-zinc-800/40">
+        <div wire:key="tire-infogrid-{{ $this->userTire->id }}" class="grid grid-cols-2 gap-3 bg-zinc-50 dark:bg-zinc-950/40 p-3.5 rounded-xl border border-zinc-100 dark:border-zinc-800/40 animate-tire-slide">
             <div class="flex flex-col gap-0.5">
                 <span class="text-[9px] uppercase font-bold tracking-wider text-zinc-400 block mb-0.5">{{ __('Date de montage') }}</span>
                 <span class="text-xs font-bold text-zinc-800 dark:text-zinc-200">
@@ -333,15 +427,26 @@ new class extends Component {
 
         <!-- End of Life / Wear Warnings -->
         @if (($this->userTire->wear_percent ?? 0) >= 80)
-            <flux:callout variant="danger" icon="exclamation-triangle" heading="{{ __('Pneu en fin de vie !') }}">
-                {{ __('Ce pneu a atteint :wear% d\'usure. Pour votre sécurité, veuillez le remplacer rapidement.', ['wear' => number_format($this->userTire->wear_percent, 0)]) }}
-            </flux:callout>
+            <div wire:key="tire-warning-danger-{{ $this->userTire->id }}" class="animate-tire-slide">
+                <flux:callout 
+                    icon="exclamation-triangle" 
+                    heading="{{ __('Pneu en fin de vie !') }}"
+                    class="[--callout-border:var(--color-michelin-yellow-dark-02)] [--callout-background:var(--color-michelin-yellow-light-01)] [--callout-heading:var(--color-zinc-950)] [--callout-text:var(--color-zinc-800)] [--callout-icon:var(--color-michelin-yellow-dark-03)]"
+                >
+                    {{ __('Ce pneu a atteint :wear% d\'usure. Pour votre sécurité, veuillez le remplacer rapidement.', ['wear' => number_format($this->userTire->wear_percent, 0)]) }}
+                </flux:callout>
+            </div>
         @elseif (($this->userTire->wear_percent ?? 0) >= 50)
-            <flux:callout variant="warning" icon="exclamation-circle" heading="{{ __('Usure modérée') }}">
-                {{ __('Pensez à permuter vos pneus avant et arrière pour équilibrer l\'usure et prolonger leur durée de vie.') }}
-            </flux:callout>
+            <div wire:key="tire-warning-warning-{{ $this->userTire->id }}" class="animate-tire-slide">
+                <flux:callout 
+                    icon="exclamation-circle" 
+                    heading="{{ __('Usure modérée') }}"
+                    class="[--callout-border:var(--color-michelin-blue-light-03)] [--callout-background:var(--color-michelin-blue-light-01)] [--callout-heading:var(--color-michelin-blue)] [--callout-text:var(--color-michelin-blue-dark-03)] [--callout-icon:var(--color-michelin-blue-dark-02)]"
+                >
+                    {{ __('Pensez à remplacer ce pneu bientôt ou équilibrez vos sorties.') }}
+                </flux:callout>
+            </div>
         @endif
-
 
         <flux:separator />
 
@@ -383,7 +488,7 @@ new class extends Component {
                     <button type="button" wire:click="quickSimulate(30)" class="flex-1 py-1.5 px-2 text-[10px] font-bold rounded bg-zinc-100 dark:bg-zinc-800 border border-zinc-200/50 dark:border-zinc-700/50 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 transition-colors">
                         +30 km
                     </button>
-                    <button type="button" wire:click="quickSimulate(50)" class="flex-1 py-1.5 px-2 text-[10px] font-bold rounded bg-zinc-100 dark:bg-zinc-800 border border-zinc-200/50 dark:border-zinc-700/50 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 transition-colors">
+                    <button type="button" wire:click="quickSimulate(50)" class="flex-1 py-1.5 px-2 text-[10px] font-bold rounded bg-zinc-100 dark:bg-zinc-800 border border-zinc-200/50 dark:border-zinc-700/50 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-350 transition-colors">
                         +50 km
                     </button>
                     <button type="button" wire:click="quickSimulate(100)" class="flex-1 py-1.5 px-2 text-[10px] font-bold rounded bg-zinc-100 dark:bg-zinc-800 border border-zinc-200/50 dark:border-zinc-700/50 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 transition-colors">
@@ -392,28 +497,15 @@ new class extends Component {
                 </div>
             </div>
 
-            <!-- Manage Actions Buttons -->
-            <div class="flex gap-2">
-                <!-- Rotate Button -->
-                <flux:button 
-                    icon="arrow-path" 
-                    variant="outline" 
-                    wire:click="rotateTire" 
-                    class="flex-1 text-xs font-bold text-zinc-700 dark:text-zinc-300"
-                >
-                    {{ __('Permuter') }}
-                </flux:button>
-
-                <!-- Reset/Replace Button -->
-                <flux:button 
-                    icon="arrow-uturn-left" 
-                    variant="outline" 
-                    wire:click="resetTire" 
-                    class="flex-1 text-xs font-bold text-zinc-750 dark:text-zinc-300 hover:text-red-600 dark:hover:text-red-400"
-                >
-                    {{ __('Nouveau Pneu') }}
-                </flux:button>
-            </div>
+            <!-- Manage Actions Button (Reset/Replace) -->
+            <flux:button 
+                icon="arrow-uturn-left" 
+                variant="outline" 
+                wire:click="resetTire" 
+                class="w-full text-xs font-bold text-zinc-750 dark:text-zinc-300 hover:text-michelin-blue dark:hover:text-michelin-blue-light-03"
+            >
+                {{ __('Remplacer / Réinitialiser ce pneu') }}
+            </flux:button>
         </div>
     </div>
 </div>

@@ -63,27 +63,14 @@ test('tire wear card can simulate a ride and update wear percentage', function (
     expect($tire->fresh()->wear_percent)->toEqual(35.00);
 });
 
-test('tire wear card can rotate the tire position', function () {
+test('tire wear card can switch view between front and rear tire', function () {
     $user = User::factory()->create();
-    $product = Product::create([
-        'global_id' => 'TEST-TIRE',
-        'web_range_name' => 'Test Speed Tire',
-    ]);
-
-    $tire = UserTire::create([
-        'user_id' => $user->id,
-        'product_id' => $product->id,
-        'position' => TirePosition::Rear,
-        'is_active' => true,
-    ]);
-
     $this->actingAs($user);
 
-    Livewire::test('tire-wear-card', ['userTire' => $tire])
-        ->call('rotateTire')
-        ->assertSet('userTire.position', TirePosition::Front);
-
-    expect($tire->fresh()->position)->toBe(TirePosition::Front);
+    Livewire::test('tire-wear-card')
+        ->assertSet('activePosition', 'REAR')
+        ->call('setPosition', 'FRONT')
+        ->assertSet('activePosition', 'FRONT');
 });
 
 test('tire wear card can reset tire stats when replaced', function () {
@@ -157,4 +144,31 @@ test('tire wear card displays alerts based on wear level', function () {
     Livewire::test('tire-wear-card', ['userTire' => $tireCrit])
         ->assertSee('Pneu en fin de vie !')
         ->assertDontSee('Usure modérée');
+});
+
+test('tire wear card can add simulated km from the input slider', function () {
+    $user = User::factory()->create();
+    $product = Product::create([
+        'global_id' => 'TEST-TIRE',
+        'web_range_name' => 'Test Speed Tire',
+        'expected_life_km' => 4000,
+    ]);
+
+    $tire = UserTire::create([
+        'user_id' => $user->id,
+        'product_id' => $product->id,
+        'position' => TirePosition::Rear,
+        'wear_percent' => 25.00,
+        'is_active' => true,
+    ]);
+
+    $this->actingAs($user);
+
+    Livewire::test('tire-wear-card', ['userTire' => $tire])
+        ->set('simulatedKm', 200)
+        ->call('addSimulatedKm')
+        ->assertSet('simulatedKm', 50)
+        ->assertSet('userTire.wear_percent', 30.00);
+
+    expect($tire->fresh()->wear_percent)->toEqual(30.00);
 });
