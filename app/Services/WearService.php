@@ -24,6 +24,9 @@ class WearService
     /**
      * Calcule l'état de santé global d'un pneu monté (Tire Health).
      */
+    /**
+     * @return array<string, int|float>
+     */
     public function getTireHealth(int $userTireId): array
     {
         // 1. Récupérer le pneu de l'utilisateur avec son profil utilisateur

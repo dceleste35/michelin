@@ -9,15 +9,17 @@ class RagService
 {
     /**
      * Appelle l'API d'embeddings pour transformer un texte en vecteur.
+     *
+     * @return float[]
      */
     public function embedText(string $text): array
     {
         // Remplacer par l'URL et la clé de l'API d'embedding que vous avez choisie (ex: OpenAI text-embedding-3-small)
         // La spec impose de passer par le HTTP client Laravel
         $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . env('EMBEDDING_API_KEY'),
+            'Authorization' => 'Bearer ' . config('services.embedding.key'),
             'Content-Type' => 'application/json',
-        ])->post(env('EMBEDDING_API_URL'), [
+        ])->post(config('services.embedding.url'), [
             'input' => $text,
             'model' => 'votre-modele-1536-dimensions', 
         ]);
@@ -32,6 +34,9 @@ class RagService
     /**
      * Recherche les documents les plus pertinents (Retrieval).
      * C'est le cœur du RAG : on récupère les faits pour les donner au LLM.
+     */
+    /**
+     * @return array<int, \stdClass>
      */
     public function retrieve(string $query, string $segment, int $limit = 5): array
     {

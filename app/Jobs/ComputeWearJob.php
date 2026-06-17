@@ -53,10 +53,13 @@ class ComputeWearJob implements ShouldQueue
         return 160.0;
     }
 
+    /**
+     * @param array<string, int|float> $health
+     */
     private function triggerAlert(int $userId, int $tireId, array $health, float $weeklyAverageKm): void
-        {
-            // On génère la recommandation et on la met en cache !
-            $recommender = app(\App\Services\RecommenderService::class);
+    {
+        // On génère la recommandation et on la met en cache !
+        $recommender = app(\App\Services\RecommenderService::class);
             $reco = $recommender->generateRecommendation($tireId);
 
             \Illuminate\Support\Facades\Log::info("Alerte déclenchée pour le user {$userId} ! Reco générée : " . $reco['recommended_tire']);

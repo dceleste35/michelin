@@ -8,6 +8,8 @@ class EmbeddingService
 {
     /**
      * Renvoie un vecteur de 1536 floats pour un texte donné.
+     *
+     * @return float[]
      */
     public function embed(string $text): array
     {

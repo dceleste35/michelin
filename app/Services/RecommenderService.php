@@ -8,12 +8,18 @@ class RecommenderService
 {
     public function __construct(
         private RagService $ragService,
-        private LlmService $llmService,
-        private WearService $wearService
+        private LlmService $llmService
     ) {}
 
     /**
      * Génère et met en cache une recommandation pour un pneu arrivant en fin de vie.
+     */
+    /**
+     * @return array{
+     *     recommendation_id: int,
+     *     recommended_tire: string,
+     *     justification: string
+     * }
      */
     public function generateRecommendation(int $userTireId): array
     {
@@ -22,7 +28,7 @@ class RecommenderService
             ->join('users', 'user_tires.user_id', '=', 'users.id')
             ->join('products', 'user_tires.product_id', '=', 'products.id')
             ->where('user_tires.id', $userTireId)
-            ->select('users.id as user_id', 'users.weight_kg', 'users.riding_style', 'products.segment', 'products.web_range_name as current_tire_name')
+            ->select('users.id as user_id', 'users.weight_kg', 'users.riding_style', 'products.segment', 'products.web_range_name as current_tire_name', 'user_tires.product_id')
             ->first();
 
         if (!$currentTireData) {
