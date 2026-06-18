@@ -19,6 +19,7 @@ use Illuminate\Support\Carbon;
  * @property string|null $wear_percent
  * @property bool $is_active
  * @property Carbon|null $archived_at
+ * @property Carbon|null $ordered_at
  */
 #[Fillable([
     'user_id',
@@ -29,6 +30,7 @@ use Illuminate\Support\Carbon;
     'wear_percent',
     'is_active',
     'archived_at',
+    'ordered_at',
 ])]
 class UserTire extends Model
 {
@@ -49,6 +51,7 @@ class UserTire extends Model
             'mounted_at' => 'date',
             'is_active' => 'boolean',
             'archived_at' => 'datetime',
+            'ordered_at' => 'datetime',
         ];
     }
 
@@ -110,5 +113,25 @@ class UserTire extends Model
     public function scopeEndOfLife(Builder $query): void
     {
         $query->where('wear_percent', '>=', self::END_OF_LIFE_WEAR);
+    }
+
+    /**
+     * Limite la requête aux pneus dont le remplacement n'a pas été commandé (alerte active).
+     *
+     * @param  Builder<UserTire>  $query
+     */
+    public function scopeNotOrdered(Builder $query): void
+    {
+        $query->whereNull('ordered_at');
+    }
+
+    /**
+     * Limite la requête aux pneus dont le remplacement a été commandé.
+     *
+     * @param  Builder<UserTire>  $query
+     */
+    public function scopeOrdered(Builder $query): void
+    {
+        $query->whereNotNull('ordered_at');
     }
 }

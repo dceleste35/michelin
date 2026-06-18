@@ -104,7 +104,7 @@ class User extends Authenticatable
      */
     public function reorderCount(): int
     {
-        return $this->tires()->notArchived()->endOfLife()->count();
+        return $this->tires()->notArchived()->endOfLife()->notOrdered()->count();
     }
 
     /**
