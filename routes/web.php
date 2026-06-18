@@ -12,6 +12,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::view('dashboard', 'dashboard')->name('dashboard');
     Route::livewire('profile', 'pages::profile')->name('profile');
     Route::livewire('activities', 'pages::activities')->name('activities');
+    Route::livewire('tires', 'pages::tires')->name('tires');
+    Route::livewire('tires/{userTire}', 'pages::tire-detail')->name('tires.show');
 });
 
 require __DIR__.'/settings.php';

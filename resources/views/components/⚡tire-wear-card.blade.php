@@ -41,14 +41,14 @@ new class extends Component {
     {
         $user = Auth::user();
         if ($user) {
+            // Pas de fabrication de données : un compte sans pneu reste à null → état vide.
             $this->userTire = $user->tires()
                 ->active()
                 ->where('position', $this->activePosition)
                 ->first()
                 ?? $user->tires()
                     ->where('position', $this->activePosition)
-                    ->first()
-                    ?? $this->createMockTireForUser($user, $this->activePosition);
+                    ->first();
         }
     }
 
@@ -59,34 +59,6 @@ new class extends Component {
     {
         $this->activePosition = $position;
         $this->loadTire();
-    }
-
-    /**
-     * Create a mock tire mount if the user doesn't have any tires registered.
-     */
-    protected function createMockTireForUser(App\Models\User $user, string $position = 'REAR'): UserTire
-    {
-        $product = Product::first() ?? Product::create([
-            'global_id' => 'MIC-PWR-GRVL',
-            'web_range_name' => 'Michelin Power Gravel',
-            'segment' => 'GRAVEL',
-            'width_etrto' => 40,
-            'diameter_etrto' => 622,
-            'expected_life_km' => 5000,
-            'image_url' => '/images/michelin_bike_tire.jpg',
-        ]);
-
-        $wear = $position === 'FRONT' ? 18.00 : 32.00;
-
-        return UserTire::create([
-            'user_id' => $user->id,
-            'product_id' => $product->id,
-            'position' => $position === 'FRONT' ? \App\Enums\TirePosition::Front : \App\Enums\TirePosition::Rear,
-            'mounted_at' => now()->subMonths(4),
-            'mounted_odometer_km' => 1500,
-            'wear_percent' => $wear,
-            'is_active' => true,
-        ]);
     }
 
     /**
@@ -213,6 +185,7 @@ new class extends Component {
 }; ?>
 
 <div class="w-full max-w-md mx-auto bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl">
+    @if ($this->userTire)
     <style>
         @keyframes tire-fade-in {
             from {
@@ -508,4 +481,17 @@ new class extends Component {
             </flux:button>
         </div>
     </div>
+    @else
+        {{-- État vide : aucun pneu enregistré (compte neuf) — on ne fabrique plus de données --}}
+        <div class="flex flex-col items-center justify-center gap-4 px-6 py-12 text-center" data-test="tire-card-empty">
+            <flux:icon icon="cube-transparent" class="size-12 text-zinc-300 dark:text-zinc-600" />
+            <div class="flex flex-col gap-1">
+                <flux:heading size="lg">{{ __('No tire registered yet') }}</flux:heading>
+                <flux:text class="text-zinc-500">{{ __('Add your Michelin tires to start tracking their wear.') }}</flux:text>
+            </div>
+            <flux:button :href="route('tires')" variant="primary" icon="plus" wire:navigate data-test="tire-card-add">
+                {{ __('Add my tires') }}
+            </flux:button>
+        </div>
+    @endif
 </div>
