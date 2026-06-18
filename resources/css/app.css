@@ -251,6 +251,7 @@ select:focus[data-flux-control] {
         text-transform: uppercase;
         letter-spacing: 0.05em;
         text-decoration: none;
+        white-space: nowrap;
         background: var(--color-michelin-yellow);
         color: var(--color-michelin-blue-dark);
         transition: filter 0.15s, transform 0.15s, box-shadow 0.15s, background 0.15s;

@@ -100,6 +100,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Nombre de pneus en fin de vie à racheter (non archivés) — pour le badge « panier ».
+     */
+    public function reorderCount(): int
+    {
+        return $this->tires()->notArchived()->endOfLife()->notOrdered()->count();
+    }
+
+    /**
      * Get the user's initials
      */
     public function initials(): string
