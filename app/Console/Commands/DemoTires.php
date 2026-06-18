@@ -48,7 +48,7 @@ class DemoTires extends Command
             'position' => TirePosition::Rear,
             'mounted_at' => $mountedAt,
             'mounted_odometer_km' => 2500,
-            'wear_percent' => $rearWear,
+            'wear_percent' => 0,
             'is_active' => true,
         ]);
 
@@ -57,7 +57,7 @@ class DemoTires extends Command
             'position' => TirePosition::Front,
             'mounted_at' => $mountedAt,
             'mounted_odometer_km' => 2500,
-            'wear_percent' => $frontWear,
+            'wear_percent' => 0,
             'is_active' => true,
         ]);
 
@@ -71,6 +71,10 @@ class DemoTires extends Command
 
         $recent = $marc->stravaActivities()->orderByDesc('start_date')->limit(3)->pluck('id');
         $marc->stravaActivities()->whereIn('id', $recent)->update(['tires_confirmed' => false]);
+
+        // L'usure se dérive des sorties : on cale le km de départ pour atteindre l'usure demandée.
+        $rear->calibrateWearTo($rearWear);
+        $front->calibrateWearTo($frontWear);
 
         $this->components->info("Paire Power Gravel montée — arrière {$rearWear} % / avant {$frontWear} %.");
 

@@ -97,11 +97,23 @@ new #[Title('Activities')] class extends Component
             'editRear' => ['nullable', Rule::in($owned)],
         ]);
 
-        auth()->user()->stravaActivities()->whereKey($this->editingId)->update([
+        $activity = auth()->user()->stravaActivities()->findOrFail($this->editingId);
+
+        // Pneus impactés par le changement : anciens (qui perdent la sortie) + nouveaux.
+        $affectedTireIds = array_unique(array_filter([
+            $activity->front_tire_id, $activity->rear_tire_id,
+            $this->editFront, $this->editRear,
+        ]));
+
+        $activity->update([
             'front_tire_id' => $this->editFront,
             'rear_tire_id' => $this->editRear,
             'tires_confirmed' => true,
         ]);
+
+        // L'usure se dérive des sorties associées : on recalcule les pneus impactés.
+        auth()->user()->tires()->with('product')->whereKey($affectedTireIds)->get()
+            ->each->recomputeWear();
 
         $this->reset('editingId', 'editFront', 'editRear');
         unset($this->activities, $this->unconfirmedCount);

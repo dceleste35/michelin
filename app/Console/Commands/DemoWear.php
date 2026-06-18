@@ -36,11 +36,11 @@ class DemoWear extends Command
         }
 
         if ($rear !== null) {
-            $marc->tires()->active()->where('position', TirePosition::Rear->value)->update(['wear_percent' => (float) $rear]);
+            $marc->tires()->active()->where('position', TirePosition::Rear->value)->with('product')->first()?->calibrateWearTo((float) $rear);
         }
 
         if ($front !== null) {
-            $marc->tires()->active()->where('position', TirePosition::Front->value)->update(['wear_percent' => (float) $front]);
+            $marc->tires()->active()->where('position', TirePosition::Front->value)->with('product')->first()?->calibrateWearTo((float) $front);
         }
 
         $this->components->info('Usure mise à jour.');

@@ -74,6 +74,22 @@ it('verifies and edits the tires of a single ride from the activities cards', fu
         ->and($ride->tires_confirmed)->toBeTrue();
 });
 
+it('derives a tire wear from the rides assigned to it', function () {
+    $user = User::factory()->create();
+    $product = Product::create(['global_id' => 'TEST', 'web_range_name' => 'Test', 'expected_life_km' => 4000]);
+    $tire = $user->tires()->create(['product_id' => $product->id, 'position' => TirePosition::Rear, 'is_active' => true, 'wear_percent' => 0, 'baseline_wear_km' => 0]);
+    $ride = StravaActivity::factory()->for($user)->create(['distance_m' => 2_000_000, 'tires_confirmed' => false]); // 2 000 km
+    $this->actingAs($user);
+
+    Livewire::test('pages::activities')
+        ->call('startEdit', $ride->id)
+        ->set('editRear', $tire->id)
+        ->call('saveRide');
+
+    // 2 000 km / 4 000 km de durée de vie = 50 % d'usure.
+    expect((float) $tire->fresh()->wear_percent)->toBe(50.0);
+});
+
 it('shows a verify-tires banner on activities and confirms all', function () {
     $user = User::factory()->create();
     StravaActivity::factory()->count(2)->for($user)->create(['tires_confirmed' => false]);
