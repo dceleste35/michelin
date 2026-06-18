@@ -16,7 +16,8 @@ use Illuminate\Support\Carbon;
  * @property TirePosition $position
  * @property Carbon|null $mounted_at
  * @property int|null $mounted_odometer_km
- * @property string|null $wear_percent
+ * @property float|null $wear_percent
+ * @property float $baseline_wear_km
  * @property bool $is_active
  * @property Carbon|null $archived_at
  * @property Carbon|null $ordered_at
@@ -28,6 +29,7 @@ use Illuminate\Support\Carbon;
     'mounted_at',
     'mounted_odometer_km',
     'wear_percent',
+    'baseline_wear_km',
     'is_active',
     'archived_at',
     'ordered_at',
@@ -52,6 +54,8 @@ class UserTire extends Model
             'is_active' => 'boolean',
             'archived_at' => 'datetime',
             'ordered_at' => 'datetime',
+            'wear_percent' => 'float',
+            'baseline_wear_km' => 'float',
         ];
     }
 
@@ -73,6 +77,35 @@ class UserTire extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    /**
+     * Recalcule et persiste l'usure (SCORE déterministe) : usure = (km de départ +
+     * km des sorties associées à ce pneu) / durée de vie du produit, bornée à 100 %.
+     */
+    public function recomputeWear(): void
+    {
+        $ridesKm = (float) StravaActivity::forUserTire($this)->sum('distance_m') / 1000;
+        $expectedLifeKm = (int) ($this->product?->expected_life_km ?: 4000);
+        $totalKm = (float) $this->baseline_wear_km + $ridesKm;
+
+        $this->wear_percent = round(min(100.0, $totalKm / $expectedLifeKm * 100), 1);
+        $this->save();
+    }
+
+    /**
+     * Cale le km de départ pour que l'usure atteigne le pourcentage cible, en tenant
+     * compte des km déjà associés (levier de démo). Les sorties ajoutées ensuite font
+     * remonter l'usure au-delà de la cible.
+     */
+    public function calibrateWearTo(float $targetPercent): void
+    {
+        $this->loadMissing('product');
+        $expectedLifeKm = (int) ($this->product?->expected_life_km ?: 4000);
+        $ridesKm = (float) StravaActivity::forUserTire($this)->sum('distance_m') / 1000;
+
+        $this->baseline_wear_km = max(0.0, $targetPercent / 100 * $expectedLifeKm - $ridesKm);
+        $this->recomputeWear();
     }
 
     /**
