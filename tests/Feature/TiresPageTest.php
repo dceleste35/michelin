@@ -37,7 +37,7 @@ it('mounts a tire from the catalogue', function () {
         ->and($user->tires()->first()->position)->toBe(TirePosition::Rear);
 });
 
-it('replaces the tire at a position instead of stacking duplicates', function () {
+it('retires the previous tire at a position when a new one is mounted', function () {
     test()->seed(ProductCatalogSeeder::class);
     $user = User::factory()->create();
     $this->actingAs($user);
@@ -47,8 +47,10 @@ it('replaces the tire at a position instead of stacking duplicates', function ()
         ->set('productId', (string) $products[0]->id)->set('position', 'REAR')->call('addTire')
         ->set('productId', (string) $products[1]->id)->set('position', 'REAR')->call('addTire');
 
-    expect($user->tires()->where('position', 'REAR')->count())->toBe(1)
-        ->and($user->tires()->first()->product_id)->toBe($products[1]->id);
+    // Un seul actif à l'arrière (le dernier monté), l'ancien est conservé pour l'historique.
+    expect($user->tires()->where('position', 'REAR')->where('is_active', true)->count())->toBe(1)
+        ->and($user->tires()->where('position', 'REAR')->where('is_active', true)->sole()->product_id)->toBe($products[1]->id)
+        ->and($user->tires()->where('position', 'REAR')->count())->toBe(2);
 });
 
 it('removes a mounted tire', function () {

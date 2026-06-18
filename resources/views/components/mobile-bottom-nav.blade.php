@@ -1,15 +1,22 @@
-{{-- Barre de navigation mobile (coquille mobile-first). Masquée sur desktop, où la sidebar Flux prend le relais. --}}
+{{-- Barre de navigation mobile (coquille mobile-first), charte Michelin. Masquée sur desktop, où la sidebar Flux prend le relais. --}}
 @php
     $tabs = [
-        ['route' => 'dashboard', 'icon' => 'home', 'label' => __('Home')],
-        ['route' => 'activities', 'icon' => 'map', 'label' => __('Activities')],
-        ['route' => 'tires', 'icon' => 'lifebuoy', 'label' => __('Tires')],
-        ['route' => 'profile', 'icon' => 'identification', 'label' => __('Profile')],
+        ['route' => 'dashboard', 'label' => __('Home')],
+        ['route' => 'activities', 'label' => __('Activities')],
+        ['route' => 'tires', 'label' => __('Tires')],
+        ['route' => 'profile', 'label' => __('Profile')],
+    ];
+
+    $icons = [
+        'dashboard' => '<path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+        'activities' => '<path d="M9 20 3 17V4l6 3 6-3 6 3v13l-6-3-6 3z"/><path d="M9 7v13M15 4v13"/>',
+        'tires' => '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.2"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/>',
+        'profile' => '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
     ];
 @endphp
 
 <nav
-    class="fixed inset-x-0 bottom-0 z-30 flex border-t border-zinc-200 bg-white/95 backdrop-blur lg:hidden dark:border-zinc-700 dark:bg-zinc-900/95"
+    class="rr-bottomnav fixed inset-x-0 bottom-0 z-30 lg:hidden"
     style="padding-bottom: env(safe-area-inset-bottom);"
     aria-label="{{ __('Primary') }}"
     data-test="mobile-bottom-nav"
@@ -19,16 +26,12 @@
         <a
             href="{{ route($tab['route']) }}"
             wire:navigate
-            @class([
-                'flex flex-1 flex-col items-center justify-center gap-1 py-2.5 text-xs font-medium transition',
-                'text-accent' => $active,
-                'text-zinc-500 dark:text-zinc-400' => ! $active,
-            ])
+            @class(['rr-bottomnav__item', 'is-active' => $active])
             @if ($active) aria-current="page" @endif
             data-test="mobile-nav-{{ $tab['route'] }}"
         >
-            <flux:icon :icon="$tab['icon']" class="size-6" />
-            {{ $tab['label'] }}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">{!! $icons[$tab['route']] !!}</svg>
+            <span>{{ $tab['label'] }}</span>
         </a>
     @endforeach
 </nav>

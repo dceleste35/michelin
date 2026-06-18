@@ -155,7 +155,7 @@
     "Back to my tires": "Retour à mes pneus",
     "Rides on this tire": "Sorties sur ce pneu",
     "No ride recorded on this tire yet.": "Aucune sortie enregistrée sur ce pneu.",
-    "Retired": "Retiré",
+    "Available": "Disponible",
     "Confirm all": "Tout confirmer",
     "To verify": "À vérifier",
     "Verify": "Vérifier",
@@ -163,5 +163,17 @@
     "Front tire": "Pneu avant",
     "Rear tire": "Pneu arrière",
     "Mounted tires": "Pneus montés",
-    "None": "Aucun"
+    "None": "Aucun",
+    "by Michelin": "par Michelin",
+    "Your tires have an end of life.": "Tes pneus ont une fin de vie.",
+    "We tell you": "On te le dit",
+    "before the flat.": "avant la crevaison.",
+    "Connect Strava. We analyse your rides, predict wear, and recommend the right Michelin tire.": "Connecte Strava. On analyse tes sorties, on prédit l'usure, on recommande le bon pneu Michelin.",
+    "We don't store your Strava data. We analyse it, that's all.": "On ne stocke pas tes données Strava. On les analyse, c'est tout.",
+    "Hello :name": "Bonjour :name",
+    "Account": "Compte",
+    "Calculated · SCORE · Strava": "Calculé · SCORE · Strava",
+    "Mount": "Monter",
+    "Mounted": "Monté",
+    "Mounted tire": "Pneu monté"
 }

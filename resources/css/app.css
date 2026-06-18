@@ -116,3 +116,313 @@ select:focus[data-flux-control] {
 /* \[:where(&)\]:size-4 {
     @apply size-4;
 } */
+
+/* ============================================================
+   RideReady — Design system mobile (charte Michelin)
+   Repris de la maquette validée, recâblé sur les tokens charte.
+   Couleurs fonctionnelles = charte : succès #2e7d32, warning #f9a825,
+   danger #b71c1c (et non les couleurs Tailwind de la maquette).
+   ============================================================ */
+@layer components {
+    .rr-screen {
+        --rr-r-sm: 4px;
+        --rr-r-md: 8px;
+        --rr-r-lg: 16px;
+        --rr-line: rgba(39, 80, 155, 0.1);
+        width: 100%;
+        max-width: 560px;
+        min-height: 100%;
+        margin-inline: auto;
+        background: var(--color-blanc);
+        color: var(--color-michelin-blue-dark);
+    }
+
+    /* ---- Barre supérieure mobile ---- */
+    .rr-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 56px;
+        padding: 0 16px;
+        background: var(--color-michelin-blue);
+    }
+    .rr-topbar__logo { height: 26px; width: auto; filter: brightness(0) invert(1); }
+
+    /* ---- Navigation basse ---- */
+    .rr-bottomnav { display: flex; align-items: stretch; height: 64px; background: var(--color-michelin-blue); }
+    .rr-bottomnav__item {
+        position: relative;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        transition: color 0.15s;
+    }
+    .rr-bottomnav__item.is-active { color: var(--color-michelin-yellow); }
+    .rr-bottomnav__item.is-active::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 15%;
+        right: 15%;
+        height: 3px;
+        background: var(--color-michelin-yellow);
+    }
+    .rr-bottomnav__item svg { width: 22px; height: 22px; }
+    .rr-bottomnav__dot {
+        position: absolute;
+        top: 8px;
+        right: calc(50% - 18px);
+        min-width: 14px;
+        height: 14px;
+        padding: 0 3px;
+        border-radius: 9999px;
+        background: var(--color-michelin-danger);
+        color: #fff;
+        font-size: 8px;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* ---- En-tête de section (bandeau bleu) ---- */
+    .rr-section { background: var(--color-michelin-blue); color: #fff; padding: 20px 24px 18px; }
+    .rr-section--center { text-align: center; }
+    .rr-section__label {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--color-michelin-yellow);
+        margin-bottom: 4px;
+    }
+    .rr-section__title { font-size: 26px; font-weight: 800; line-height: 1.1; text-transform: uppercase; }
+    .rr-section__sub { font-size: 13px; color: rgba(255, 255, 255, 0.7); margin-top: 4px; }
+
+    /* ---- Corps de page ---- */
+    .rr-body { padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+
+    /* ---- Cartes ---- (base appliquée à toutes les variantes) */
+    .rr-card,
+    .rr-card--blue,
+    .rr-card--yellow {
+        background: #fff;
+        border-radius: var(--rr-r-lg, 16px);
+        border: 1.5px solid rgba(39, 80, 155, 0.12);
+        padding: 24px;
+        box-shadow: 0 2px 8px rgba(39, 80, 155, 0.06);
+    }
+    .rr-card--blue { background: var(--color-michelin-blue); color: #fff; border: none; }
+    .rr-card--yellow { background: var(--color-michelin-yellow); color: var(--color-michelin-blue-dark); border: none; }
+    .rr-card--alert { border-color: rgba(249, 168, 37, 0.5); box-shadow: 0 0 0 1px rgba(249, 168, 37, 0.25); }
+    .rr-card__eyebrow {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--color-michelin-gray);
+    }
+
+    /* ---- Boutons ---- (la base s'applique à toutes les variantes, qu'on cite ou non .rr-btn) */
+    .rr-btn,
+    .rr-btn--secondary,
+    .rr-btn--strava {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        height: 52px;
+        padding: 0 24px;
+        border: none;
+        cursor: pointer;
+        border-radius: var(--rr-r-sm, 4px);
+        font-family: inherit;
+        font-weight: 800;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        text-decoration: none;
+        background: var(--color-michelin-yellow);
+        color: var(--color-michelin-blue-dark);
+        transition: filter 0.15s, transform 0.15s, box-shadow 0.15s, background 0.15s;
+    }
+    .rr-btn:hover { filter: brightness(0.96); }
+    .rr-btn:active { transform: translateY(1px); }
+    .rr-btn--secondary {
+        height: 48px;
+        background: #fff;
+        color: var(--color-michelin-blue);
+        border: 2px solid var(--color-michelin-blue);
+        font-size: 13px;
+        font-weight: 700;
+    }
+    .rr-btn--secondary:hover { background: rgba(39, 80, 155, 0.06); }
+    .rr-btn--strava {
+        height: 56px;
+        background: var(--color-strava);
+        color: #fff;
+        font-weight: 700;
+        font-size: 16px;
+        text-transform: none;
+        letter-spacing: 0;
+    }
+    .rr-btn--strava:hover { filter: brightness(0.96); }
+    /* Variante compacte (actions inline, ex. vérifier un pneu) */
+    .rr-btn--sm { width: auto; height: 38px; padding: 0 16px; font-size: 12px; }
+
+    /* ---- Badges ---- */
+    .rr-badge-source {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--color-michelin-blue);
+        background: rgba(39, 80, 155, 0.08);
+        border: 1px solid rgba(39, 80, 155, 0.2);
+        padding: 2px 8px;
+        border-radius: var(--rr-r-sm, 4px);
+    }
+    .rr-badge-rider {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+        font-size: 14px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--color-michelin-yellow);
+        background: var(--color-michelin-blue);
+        padding: 10px 16px;
+        border-radius: var(--rr-r-sm, 4px);
+    }
+    .rr-badge-tag {
+        display: inline-block;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--color-michelin-yellow);
+        background: var(--color-michelin-blue);
+        padding: 4px 10px;
+        border-radius: var(--rr-r-sm, 4px);
+    }
+    .rr-chip,
+    .rr-chip--warn,
+    .rr-chip--ok,
+    .rr-chip--danger {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--color-michelin-blue);
+        background: rgba(39, 80, 155, 0.08);
+        padding: 3px 9px;
+        border-radius: 9999px;
+        white-space: nowrap;
+    }
+    /* Variantes d'état (charte). Amber = texte foncé pour le contraste. */
+    .rr-chip--warn { color: var(--color-michelin-blue-dark); background: var(--color-michelin-warning); }
+    .rr-chip--ok { color: #fff; background: var(--color-michelin-success); }
+    .rr-chip--danger { color: #fff; background: var(--color-michelin-danger); }
+
+    /* ---- Lignes clé/valeur ---- */
+    .rr-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 9px 0;
+        border-bottom: 1px solid rgba(39, 80, 155, 0.08);
+    }
+    .rr-row:last-child { border-bottom: none; }
+    .rr-row__key { font-size: 13px; color: var(--color-michelin-gray); }
+    .rr-row__val { font-size: 13px; font-weight: 700; color: var(--color-michelin-blue-dark); }
+
+    /* ---- Bannière d'alerte ---- */
+    .rr-alert {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        background: var(--color-michelin-warning);
+        border-radius: var(--rr-r-md, 8px);
+        padding: 12px 16px;
+    }
+    .rr-alert__left { display: flex; align-items: flex-start; gap: 8px; flex: 1; }
+    .rr-alert__left svg { width: 18px; height: 18px; color: #fff; flex-shrink: 0; margin-top: 1px; }
+    .rr-alert__title { font-size: 12px; font-weight: 800; color: #fff; text-transform: uppercase; letter-spacing: 0.04em; }
+    .rr-alert__sub { font-size: 11px; color: rgba(255, 255, 255, 0.9); margin-top: 2px; }
+    .rr-alert__cta {
+        font-size: 12px;
+        font-weight: 800;
+        color: #fff;
+        text-decoration: underline;
+        white-space: nowrap;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        cursor: pointer;
+    }
+
+    /* ---- Jauges d'usure ---- */
+    .rr-gauges { display: flex; gap: 10px; }
+    .rr-gauge {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        background: #fff;
+        border: 1.5px solid rgba(39, 80, 155, 0.15);
+        border-radius: var(--rr-r-lg, 16px);
+        padding: 14px 10px;
+        box-shadow: 0 2px 8px rgba(39, 80, 155, 0.06);
+    }
+    .rr-gauge__pos { font-size: 10px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-michelin-blue); }
+    .rr-gauge__km { font-size: 13px; font-weight: 700; color: var(--color-michelin-blue-dark); }
+    .rr-gauge__status { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; }
+
+    /* ---- Divers ---- */
+    .rr-divider { border: none; border-top: 1.5px solid rgba(39, 80, 155, 0.1); margin: 16px 0; }
+    .rr-quote { font-size: 13px; line-height: 1.6; color: var(--color-michelin-gray); font-style: italic; }
+    .rr-field {
+        width: 100%;
+        height: 44px;
+        padding: 0 12px;
+        border-radius: var(--rr-r-sm, 4px);
+        border: 1.5px solid rgba(39, 80, 155, 0.25);
+        background: #fff;
+        color: var(--color-michelin-blue-dark);
+        font-size: 14px;
+        font-family: inherit;
+    }
+    .rr-field:focus { outline: none; border-color: var(--color-michelin-blue); box-shadow: 0 0 0 3px rgba(39, 80, 155, 0.15); }
+    .rr-label {
+        display: block;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--color-michelin-gray);
+        margin-bottom: 6px;
+    }
+
+    /* ---- États fonctionnels (charte) ---- */
+    .rr-ok { color: var(--color-michelin-success); }
+    .rr-warn { color: var(--color-michelin-warning); }
+    .rr-danger { color: var(--color-michelin-danger); }
+}

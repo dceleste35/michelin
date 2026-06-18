@@ -146,6 +146,38 @@ test('tire wear card displays alerts based on wear level', function () {
         ->assertDontSee('Usure modérée');
 });
 
+test('tire wear card can swap the mounted tire from the collection', function () {
+    $user = User::factory()->create();
+    $product = Product::create([
+        'global_id' => 'TEST-TIRE',
+        'web_range_name' => 'Test Speed Tire',
+    ]);
+
+    $active = UserTire::create([
+        'user_id' => $user->id,
+        'product_id' => $product->id,
+        'position' => TirePosition::Rear,
+        'wear_percent' => 60.00,
+        'is_active' => true,
+    ]);
+    $spare = UserTire::create([
+        'user_id' => $user->id,
+        'product_id' => $product->id,
+        'position' => TirePosition::Rear,
+        'wear_percent' => 0.00,
+        'is_active' => false,
+    ]);
+
+    $this->actingAs($user);
+
+    Livewire::test('tire-wear-card')
+        ->call('mountTire', $spare->id)
+        ->assertSet('userTire.id', $spare->id);
+
+    expect($spare->fresh()->is_active)->toBeTrue()
+        ->and($active->fresh()->is_active)->toBeFalse();
+});
+
 test('tire wear card can add simulated km from the input slider', function () {
     $user = User::factory()->create();
     $product = Product::create([
