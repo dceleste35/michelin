@@ -1,6 +1,5 @@
 <?php
 
-use App\Enums\RidingStyle;
 use App\Enums\Segment;
 use App\Services\ProfileInferenceService;
 use Illuminate\Validation\Rule;
@@ -97,66 +96,100 @@ new #[Title('Rider profile')] class extends Component
     }
 }; ?>
 
-<section class="mx-auto flex w-full max-w-2xl flex-col gap-6">
-    <div>
-        <flux:heading size="xl" level="1">{{ __('We figured out your profile') }}</flux:heading>
-        <flux:subheading>{{ __('No questionnaire — inferred from your rides. One tap to adjust.') }}</flux:subheading>
+<div class="rr-screen">
+    <div class="rr-section">
+        <div class="rr-section__label">{{ __('Rider profile') }}</div>
+        <div class="rr-section__title">{{ __('We figured out your profile') }}</div>
+        <div class="rr-section__sub">{{ __('No questionnaire — inferred from your rides. One tap to adjust.') }}</div>
     </div>
 
-    <flux:card class="flex flex-col gap-5">
-        <p class="text-lg leading-relaxed">
-            {{ __("Here's what we understood:") }}
-            <span class="font-semibold">{{ __('a :segment rider', ['segment' => $this->segmentOptions[$segment]]) }}</span>,
-            {{ $style === \App\Enums\RidingStyle::Aggressif->value ? __('punchy and aggressive') : __('steady, long distance') }},
-            {{ __(':road% road / :trail% trail', ['road' => $terrainPct['asphalt'], 'trail' => 100 - $terrainPct['asphalt']]) }}.
-        </p>
+    <div class="rr-body">
+        <div class="rr-card flex flex-col gap-5">
+            {{-- Identité rider (l'ancre de la carte) --}}
+            <div class="rr-badge-rider">
+                {{ __('a :segment rider', ['segment' => $this->segmentOptions[$segment]]) }} ·
+                {{ $style === \App\Enums\RidingStyle::Aggressif->value ? __('punchy and aggressive') : __('steady, long distance') }}
+            </div>
 
-        <div class="flex flex-col gap-2">
-            <div class="flex justify-between">
-                <flux:badge color="blue" size="sm">{{ $terrainPct['asphalt'] }}% {{ __('road') }}</flux:badge>
-                <flux:badge color="green" size="sm">{{ 100 - $terrainPct['asphalt'] }}% {{ __('trail') }}</flux:badge>
+            {{-- Terrain : une seule représentation (libellé + barre) --}}
+            <div class="flex flex-col gap-2">
+                <div class="flex items-center justify-between">
+                    <span class="rr-row__key">{{ __('Terrain') }}</span>
+                    <span class="rr-row__val">{{ __(':road% road / :trail% trail', ['road' => $terrainPct['asphalt'], 'trail' => 100 - $terrainPct['asphalt']]) }}</span>
+                </div>
+                <div class="flex h-2.5 overflow-hidden rounded-full bg-zinc-200">
+                    <div class="bg-michelin-blue" style="width: {{ $terrainPct['asphalt'] }}%"></div>
+                    <div class="bg-michelin-green" style="width: {{ 100 - $terrainPct['asphalt'] }}%"></div>
+                </div>
             </div>
-            <div class="flex h-3 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700">
-                <div class="bg-michelin-blue" style="width: {{ $terrainPct['asphalt'] }}%"></div>
-                <div class="bg-michelin-green" style="width: {{ 100 - $terrainPct['asphalt'] }}%"></div>
+
+            {{-- Poids système --}}
+            <div class="flex flex-col gap-2">
+                <div class="flex items-center justify-between">
+                    <span class="rr-label !mb-0">{{ __('System weight') }}</span>
+                    <span class="text-base font-black tabular-nums text-michelin-blue-dark" data-test="weight-value">{{ $weightKg }} kg</span>
+                </div>
+                <input
+                    type="range"
+                    min="40"
+                    max="150"
+                    wire:model.live.debounce.300ms="weightKg"
+                    class="w-full accent-michelin-blue"
+                    data-test="weight-slider"
+                />
+                <p class="text-xs leading-relaxed text-michelin-gray">{{ __('Rider + bike. Affects tire wear estimates.') }}</p>
             </div>
+
+            {{-- Ajustement manuel du segment --}}
+            @if ($adjusting)
+                <div class="flex flex-col gap-1.5">
+                    <label class="rr-label !mb-0">{{ __('Segment') }}</label>
+                    <select wire:model.live="segment" class="rr-field" data-test="segment-select">
+                        @foreach ($this->segmentOptions as $value => $label)
+                            <option value="{{ $value }}">{{ $label }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            @endif
+
+            {{-- Provenance courte (charte) --}}
+            <span class="rr-badge-source self-start">{{ __('Calculated · SCORE · Strava') }}</span>
         </div>
 
-        @if ($adjusting)
-            <flux:select wire:model.live="segment" :label="__('Segment')" data-test="segment-select">
-                @foreach ($this->segmentOptions as $value => $label)
-                    <flux:select.option value="{{ $value }}">{{ $label }}</flux:select.option>
-                @endforeach
-            </flux:select>
-        @endif
-
-        <div class="flex flex-col gap-1">
-            <label class="flex items-center justify-between text-sm font-medium">
-                <span>{{ __('System weight') }}</span>
-                <span class="font-semibold" data-test="weight-value">{{ $weightKg }} kg</span>
-            </label>
-            <input
-                type="range"
-                min="40"
-                max="150"
-                wire:model.live.debounce.300ms="weightKg"
-                class="w-full accent-michelin-blue"
-                data-test="weight-slider"
-            />
-            <flux:text size="sm" class="text-zinc-500">
-                {{ __('Rider + bike. Affects tire wear estimates.') }}
-            </flux:text>
-        </div>
-    </flux:card>
-
-    <div class="flex items-center gap-3">
-        <flux:button wire:click="confirm" variant="primary" data-test="confirm-profile">
+        <button type="button" wire:click="confirm" class="rr-btn" data-test="confirm-profile">
             {{ __("Yes, that's right") }}
-        </flux:button>
+        </button>
         @unless ($adjusting)
-            <flux:button wire:click="adjust" variant="ghost" data-test="adjust-profile">
+            <button type="button" wire:click="adjust" class="rr-btn rr-btn--secondary" data-test="adjust-profile">
                 {{ __('Adjust') }}
-            </flux:button>
+            </button>
         @endunless
+
+        {{-- Compte utilisateur — déporté ici depuis la top-bar (réglages + déconnexion) --}}
+        <div class="rr-card">
+            <p class="rr-card__eyebrow">{{ __('Account') }}</p>
+            <div class="mt-3 flex items-center gap-3">
+                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-michelin-blue text-sm font-extrabold text-white">
+                    {{ auth()->user()->initials() }}
+                </div>
+                <div class="min-w-0">
+                    <p class="truncate font-bold text-michelin-blue-dark">{{ auth()->user()->name }}</p>
+                    <p class="truncate text-sm text-michelin-gray">{{ auth()->user()->email }}</p>
+                </div>
+            </div>
+
+            <div class="rr-divider"></div>
+
+            <a href="{{ route('profile.edit') }}" wire:navigate class="rr-btn rr-btn--secondary">
+                {{ __('Settings') }}
+            </a>
+
+            <form method="POST" action="{{ route('logout') }}" class="mt-3">
+                @csrf
+                <button type="submit" class="w-full py-2 text-center text-sm font-bold uppercase tracking-wide text-michelin-danger" data-test="logout-button">
+                    {{ __('Log out') }}
+                </button>
+            </form>
+        </div>
     </div>
-</section>
+</div>

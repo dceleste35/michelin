@@ -37,7 +37,7 @@ it('mounts a tire from the catalogue', function () {
         ->and($user->tires()->first()->position)->toBe(TirePosition::Rear);
 });
 
-it('replaces the tire at a position instead of stacking duplicates', function () {
+it('retires the previous tire at a position when a new one is mounted', function () {
     test()->seed(ProductCatalogSeeder::class);
     $user = User::factory()->create();
     $this->actingAs($user);
@@ -47,8 +47,10 @@ it('replaces the tire at a position instead of stacking duplicates', function ()
         ->set('productId', (string) $products[0]->id)->set('position', 'REAR')->call('addTire')
         ->set('productId', (string) $products[1]->id)->set('position', 'REAR')->call('addTire');
 
-    expect($user->tires()->where('position', 'REAR')->count())->toBe(1)
-        ->and($user->tires()->first()->product_id)->toBe($products[1]->id);
+    // Un seul actif à l'arrière (le dernier monté), l'ancien est conservé pour l'historique.
+    expect($user->tires()->where('position', 'REAR')->where('is_active', true)->count())->toBe(1)
+        ->and($user->tires()->where('position', 'REAR')->where('is_active', true)->sole()->product_id)->toBe($products[1]->id)
+        ->and($user->tires()->where('position', 'REAR')->count())->toBe(2);
 });
 
 it('removes a mounted tire', function () {
@@ -64,6 +66,43 @@ it('removes a mounted tire', function () {
     Livewire::test('pages::tires')->call('removeTire', $tire->id);
 
     expect($user->tires()->count())->toBe(0);
+});
+
+it('archives an available tire and restores it', function () {
+    test()->seed(ProductCatalogSeeder::class);
+    $user = User::factory()->create();
+    $tire = $user->tires()->create(['product_id' => Product::first()->id, 'position' => TirePosition::Rear, 'is_active' => false]);
+    $this->actingAs($user);
+
+    Livewire::test('pages::tires')->call('archiveTire', $tire->id);
+    expect($tire->fresh()->archived_at)->not->toBeNull();
+
+    Livewire::test('pages::tires')->call('unarchiveTire', $tire->id);
+    expect($tire->fresh()->archived_at)->toBeNull();
+});
+
+it('does not archive the currently mounted tire', function () {
+    test()->seed(ProductCatalogSeeder::class);
+    $user = User::factory()->create();
+    $tire = $user->tires()->create(['product_id' => Product::first()->id, 'position' => TirePosition::Rear, 'is_active' => true]);
+    $this->actingAs($user);
+
+    Livewire::test('pages::tires')->call('archiveTire', $tire->id);
+
+    expect($tire->fresh()->archived_at)->toBeNull(); // un pneu monté n'est pas archivable
+});
+
+it('hides archived tires from the current collection but lists them apart', function () {
+    test()->seed(ProductCatalogSeeder::class);
+    $user = User::factory()->create();
+    $active = $user->tires()->create(['product_id' => Product::first()->id, 'position' => TirePosition::Rear, 'is_active' => true]);
+    $archived = $user->tires()->create(['product_id' => Product::first()->id, 'position' => TirePosition::Front, 'is_active' => false, 'archived_at' => now()]);
+    $this->actingAs($user);
+
+    $component = Livewire::test('pages::tires');
+
+    expect($component->instance()->tires->pluck('id'))->toContain($active->id)->not->toContain($archived->id)
+        ->and($component->instance()->archivedTires->pluck('id'))->toContain($archived->id);
 });
 
 it('rejects an invalid tire submission', function () {

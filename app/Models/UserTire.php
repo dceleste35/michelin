@@ -18,6 +18,7 @@ use Illuminate\Support\Carbon;
  * @property int|null $mounted_odometer_km
  * @property string|null $wear_percent
  * @property bool $is_active
+ * @property Carbon|null $archived_at
  */
 #[Fillable([
     'user_id',
@@ -27,6 +28,7 @@ use Illuminate\Support\Carbon;
     'mounted_odometer_km',
     'wear_percent',
     'is_active',
+    'archived_at',
 ])]
 class UserTire extends Model
 {
@@ -41,6 +43,7 @@ class UserTire extends Model
             'position' => TirePosition::class,
             'mounted_at' => 'date',
             'is_active' => 'boolean',
+            'archived_at' => 'datetime',
         ];
     }
 
@@ -72,5 +75,25 @@ class UserTire extends Model
     public function scopeActive(Builder $query): void
     {
         $query->where('is_active', true);
+    }
+
+    /**
+     * Limite la requête aux pneus non archivés (collection courante).
+     *
+     * @param  Builder<UserTire>  $query
+     */
+    public function scopeNotArchived(Builder $query): void
+    {
+        $query->whereNull('archived_at');
+    }
+
+    /**
+     * Limite la requête aux pneus archivés (rangés, conservés pour l'historique).
+     *
+     * @param  Builder<UserTire>  $query
+     */
+    public function scopeArchived(Builder $query): void
+    {
+        $query->whereNotNull('archived_at');
     }
 }
