@@ -64,12 +64,15 @@ php artisan migrate --force
 
 ## 🧪 Seeding Initial en Production
 
-Lors du premier déploiement, il est nécessaire de remplir le catalogue de produits Michelin pour que l'algorithme de recommandation fonctionne.  
-Exécutez cette tâche unique à l'aide de la console de commandes intégrée dans le tableau de bord Laravel Cloud :
+Lors du premier déploiement, il est nécessaire de remplir le catalogue de produits Michelin pour que l'algorithme de recommandation fonctionne, puis d'initialiser le persona de démo Marc (sous lequel le bouton « Se connecter avec Strava » authentifie en démo).  
+Exécutez ces tâches uniques à l'aide de la console de commandes intégrée dans le tableau de bord Laravel Cloud, **dans cet ordre** (Marc dépend du catalogue) :
 
 ```bash
 php artisan db:seed --class=ProductCatalogSeeder --force
+php artisan db:seed --class=MarcSeeder --force
 ```
 
+Les deux seeders sont idempotents (`updateOrCreate`) : on peut les relancer sans créer de doublons ni écraser de comptes réels. Sans `MarcSeeder`, le bouton « Se connecter avec Strava » redirige vers `/login` en production faute de profil héros.
+
 > [!WARNING]
-> La commande globale `php artisan demo:reset` ou `php artisan db:seed` ne doit **pas** être lancée en production, car elle effectue un `migrate:fresh` qui supprime toutes les données existantes. Utilisez la commande ciblée `--class=ProductCatalogSeeder` ci-dessus pour initialiser le catalogue produits de manière sûre sans impacter les comptes utilisateurs réels.
+> La commande `php artisan demo:reset` ne doit **pas** être lancée en production : elle effectue un `migrate:fresh` qui supprime toutes les données existantes. De même, `php artisan db:seed` (sans `--class`) recrée un « Test User » et n'est pas idempotent. Utilisez uniquement les commandes ciblées `--class=…` ci-dessus pour initialiser sans impacter les comptes utilisateurs réels.
