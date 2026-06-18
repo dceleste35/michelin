@@ -115,10 +115,18 @@
                 justify-content: center;
             }
 
+            /* Logo couleur sur pastille blanche (charte : clear-space sur fond foncé/imagé) */
+            .rr-hero__brand {
+                display: inline-flex;
+                align-items: center;
+                background: #fff;
+                border-radius: 14px;
+                padding: 10px 16px;
+                box-shadow: 0 14px 36px -12px rgba(0, 0, 0, 0.55);
+            }
             .rr-hero__logo {
-                height: 40px;
+                height: 30px;
                 width: auto;
-                filter: brightness(0) invert(1);
             }
 
             .rr-hero__eyebrow {
@@ -260,12 +268,9 @@
             <div class="rr-hero__glow"></div>
 
             <div class="rr-hero__top">
-                <img
-                    src="{{ asset('images/michelin-logo.png') }}"
-                    alt="Michelin"
-                    class="rr-hero__logo rr-reveal"
-                    style="--d: 0.1s;"
-                />
+                <span class="rr-hero__brand rr-reveal" style="--d: 0.1s;">
+                    <img src="{{ asset('images/michelin-logo.png') }}" alt="Michelin" class="rr-hero__logo" />
+                </span>
 
                 <p class="rr-hero__eyebrow rr-reveal" style="--d: 0.25s;">
                     RideReady <b>·</b> {{ __('by Michelin') }}

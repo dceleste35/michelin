@@ -18,7 +18,9 @@
             <div class="pointer-events-none absolute inset-x-0 top-0 h-1 bg-michelin-yellow"></div>
             <div class="pointer-events-none absolute left-1/2 top-[-20%] aspect-square w-[120%] -translate-x-1/2 rounded-full" style="background: radial-gradient(circle, rgba(39,80,155,0.45) 0%, rgba(39,80,155,0) 60%); filter: blur(8px);"></div>
 
-            <img src="{{ asset('images/michelin-logo.png') }}" alt="Michelin" class="relative h-12 w-auto" style="filter: brightness(0) invert(1);" />
+            <span class="relative inline-flex items-center rounded-2xl bg-white px-5 py-3.5 shadow-2xl">
+                <img src="{{ asset('images/michelin-logo.png') }}" alt="Michelin" class="h-9 w-auto" />
+            </span>
 
             {{-- DESKTOP : scanner pour passer sur mobile --}}
             <div class="relative hidden flex-col items-center gap-7 lg:flex" data-test="qr-gate">
