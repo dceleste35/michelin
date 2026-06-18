@@ -113,10 +113,10 @@ php artisan demo:wear --rear=86 --front=62
 ## Sur le cloud (Laravel Cloud)
 
 - Déployer, puis (via le runner de commandes Laravel Cloud) :
-  - `php artisan migrate --force`
-  - `php artisan db:seed --force` *(ou `demo:reset --force`)* → état de départ
-- Piloter ensuite avec `demo:tires` / `demo:wear` selon le moment de la démo.
-- ⚠️ `demo:reset` fait un `migrate:fresh` (bloqué en prod sans `--force`). Pour rejouer sans tout recréer, on peut relancer `db:seed --force`.
+  - `php artisan migrate --force` *(schéma — au premier déploiement / après une nouvelle migration)*
+  - `php artisan demo:reset --force` → **état de départ** (premier arrivant)
+- Piloter ensuite avec `php artisan demo:tires` / `php artisan demo:wear`.
+- ✅ `demo:reset` réinitialise au **niveau données** (pas de `migrate:fresh`) → il fonctionne en production avec `--force` et **purge l'ancien état** (même un Marc « mûr » à 4 pneus revient à 0 pneu). Rejouable autant de fois que voulu.
 
 ---
 

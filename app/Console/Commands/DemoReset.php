@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands;
 
+use Database\Seeders\DemoSeeder;
+use Database\Seeders\ProductCatalogSeeder;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
@@ -11,9 +13,10 @@ use Illuminate\Console\Command;
 class DemoReset extends Command
 {
     /**
-     * Rejoue le seed proprement (migrate:fresh + catalogue + Marc premier arrivant) pour
-     * redonner le point de départ de la démo. Déterministe : deux exécutions donnent un
-     * état identique, sans doublon. Garde-fou : refus en production. Ensuite : demo:tires, demo:wear.
+     * Remet le point de départ de la démo au niveau DONNÉES (pas de migrate:fresh) : rejoue le
+     * catalogue puis le DemoSeeder, qui purge les sorties/pneus de Marc et recrée un premier
+     * arrivant. Marche aussi en production (où migrate:fresh est interdit). Déterministe et
+     * idempotent. Garde-fou : refus en production sans --force.
      */
     public function handle(): int
     {
@@ -25,10 +28,8 @@ class DemoReset extends Command
 
         $this->components->info('Réinitialisation de la base de démo…');
 
-        $this->call('migrate:fresh', [
-            '--seed' => true,
-            '--force' => true,
-        ]);
+        $this->callSilent('db:seed', ['--class' => ProductCatalogSeeder::class, '--force' => true]);
+        $this->callSilent('db:seed', ['--class' => DemoSeeder::class, '--force' => true]);
 
         $this->components->info('Démo prête — Marc connecté, sorties importées, aucun pneu. Suite : demo:tires puis demo:wear.');
 

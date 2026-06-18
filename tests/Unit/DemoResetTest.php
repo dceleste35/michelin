@@ -4,9 +4,9 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\TestCase;
 
-// `demo:reset` rejoue lui-même un `migrate:fresh`, qui ne peut pas s'exécuter dans
-// la transaction de LazilyRefreshDatabase (VACUUM SQLite interdit en transaction).
-// On utilise donc DatabaseMigrations (sans transaction enveloppante) pour ce test.
+// `demo:reset` réinitialise au niveau données (db:seed) sans migrate:fresh — il marche donc
+// aussi en production. On garde DatabaseMigrations ici pour isoler le seeding de ce test du
+// reste de la suite (pas de transaction enveloppante qui interférerait avec les seeders).
 uses(TestCase::class, DatabaseMigrations::class);
 
 it('refuse de réinitialiser la démo en production sans --force', function () {

@@ -43,7 +43,9 @@ class DemoSeeder extends Seeder
             ],
         );
 
-        // Point de départ : collection de pneus vide.
+        // Repart d'un état propre, quel que soit l'état précédent (y compris l'ancien Marc « mûr ») :
+        // exactement les sorties de démo, et aucune pneu.
+        $marc->stravaActivities()->delete();
         $marc->tires()->delete();
 
         $this->seedActivities($marc);
