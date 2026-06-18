@@ -33,11 +33,6 @@ return [
         'embeddings_model' => env('OPENAI_EMBEDDINGS_MODEL', 'text-embedding-3-small'),
     ],
 
-    'anthropic' => [
-        'key' => env('ANTHROPIC_API_KEY'),
-        'model' => env('ANTHROPIC_MODEL', 'claude-3-haiku-20240307'),
-    ],
-
     'embedding' => [
         'key' => env('EMBEDDING_API_KEY'),
         'url' => env('EMBEDDING_API_URL'),
