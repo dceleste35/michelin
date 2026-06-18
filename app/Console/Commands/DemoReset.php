@@ -7,13 +7,13 @@ use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 
 #[Signature('demo:reset {--force : Forcer l\'exécution même en production}')]
-#[Description('Réinitialise la démo à son état déterministe exact (Marc 86 % d\'usure arrière, alerte prête).')]
+#[Description('Réinitialise la démo à l\'état « premier arrivant » (Strava connecté, sorties, aucun pneu).')]
 class DemoReset extends Command
 {
     /**
-     * Rejoue le seed proprement (migrate:fresh + catalogue + Marc calibré) pour
-     * redonner exactement l'état de démo. Déterministe : deux exécutions donnent
-     * un état identique, sans doublon. Garde-fou : refus en production.
+     * Rejoue le seed proprement (migrate:fresh + catalogue + Marc premier arrivant) pour
+     * redonner le point de départ de la démo. Déterministe : deux exécutions donnent un
+     * état identique, sans doublon. Garde-fou : refus en production. Ensuite : demo:tires, demo:wear.
      */
     public function handle(): int
     {
@@ -30,7 +30,7 @@ class DemoReset extends Command
             '--force' => true,
         ]);
 
-        $this->components->info('Démo prête — Marc à 86 % d\'usure arrière, alerte armée.');
+        $this->components->info('Démo prête — Marc connecté, sorties importées, aucun pneu. Suite : demo:tires puis demo:wear.');
 
         return self::SUCCESS;
     }

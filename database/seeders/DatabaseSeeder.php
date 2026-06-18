@@ -15,9 +15,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Base de démo : catalogue produits + Marc « premier arrivant » (sorties, aucun pneu).
+        // Les commandes demo:tires / demo:wear font ensuite avancer le scénario.
         $this->call([
             ProductCatalogSeeder::class,
-            MarcSeeder::class,
+            DemoSeeder::class,
         ]);
 
         User::factory()->create([
