@@ -42,11 +42,14 @@ new class extends Component {
         $user = Auth::user();
         if ($user) {
             // Pas de fabrication de données : un compte sans pneu reste à null → état vide.
+            // Les pneus archivés sont exclus (rangés hors collection courante).
             $this->userTire = $user->tires()
                 ->active()
+                ->notArchived()
                 ->where('position', $this->activePosition)
                 ->first()
                 ?? $user->tires()
+                    ->notArchived()
                     ->where('position', $this->activePosition)
                     ->first();
         }
@@ -76,6 +79,7 @@ new class extends Component {
 
         return $user->tires()
             ->with('product')
+            ->notArchived()
             ->where('position', $this->activePosition)
             ->orderByDesc('is_active')
             ->get();

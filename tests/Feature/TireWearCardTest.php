@@ -178,6 +178,19 @@ test('tire wear card can swap the mounted tire from the collection', function ()
         ->and($active->fresh()->is_active)->toBeFalse();
 });
 
+test('tire wear card excludes archived tires from the swap selector', function () {
+    $user = User::factory()->create();
+    $product = Product::create(['global_id' => 'TEST-TIRE', 'web_range_name' => 'Test Speed Tire']);
+    $active = UserTire::create(['user_id' => $user->id, 'product_id' => $product->id, 'position' => TirePosition::Rear, 'is_active' => true]);
+    $archived = UserTire::create(['user_id' => $user->id, 'product_id' => $product->id, 'position' => TirePosition::Rear, 'is_active' => false, 'archived_at' => now()]);
+
+    $this->actingAs($user);
+
+    $ids = Livewire::test('tire-wear-card')->instance()->positionTires()->pluck('id');
+
+    expect($ids)->toContain($active->id)->not->toContain($archived->id);
+});
+
 test('tire wear card can add simulated km from the input slider', function () {
     $user = User::factory()->create();
     $product = Product::create([

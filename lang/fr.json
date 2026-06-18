@@ -175,5 +175,11 @@
     "Calculated · SCORE · Strava": "Calculé · SCORE · Strava",
     "Mount": "Monter",
     "Mounted": "Monté",
-    "Mounted tire": "Pneu monté"
+    "Mounted tire": "Pneu monté",
+    "Archive": "Archiver",
+    "Archived": "Archivé",
+    "Archived tires": "Pneus archivés",
+    "Restore": "Restaurer",
+    "Show": "Voir",
+    "Hide": "Masquer"
 }

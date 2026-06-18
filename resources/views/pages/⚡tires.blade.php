@@ -19,20 +19,33 @@ new #[Title('My tires')] class extends Component
 
     public int $mountedOdometerKm = 0;
 
+    public bool $showArchived = false;
+
     public function mount(): void
     {
         $this->mountedAt = now()->toDateString();
     }
 
     /**
-     * The rider's mounted tires (front + rear).
+     * The rider's current tires (mounted + available), excluding archived ones.
      *
      * @return Collection<int, UserTire>
      */
     #[Computed]
     public function tires(): Collection
     {
-        return auth()->user()->tires()->with('product')->orderByDesc('is_active')->get();
+        return auth()->user()->tires()->with('product')->notArchived()->orderByDesc('is_active')->get();
+    }
+
+    /**
+     * The rider's archived tires (set aside, kept for history).
+     *
+     * @return Collection<int, UserTire>
+     */
+    #[Computed]
+    public function archivedTires(): Collection
+    {
+        return auth()->user()->tires()->with('product')->archived()->latest('archived_at')->get();
     }
 
     /**
@@ -84,7 +97,32 @@ new #[Title('My tires')] class extends Component
     {
         auth()->user()->tires()->whereKey($tireId)->delete();
 
-        unset($this->tires);
+        unset($this->tires, $this->archivedTires);
+    }
+
+    /**
+     * Archive a tire (set it aside without deleting). Only a non-mounted tire can be archived.
+     */
+    public function archiveTire(int $tireId): void
+    {
+        auth()->user()->tires()
+            ->whereKey($tireId)
+            ->where('is_active', false)
+            ->update(['archived_at' => now()]);
+
+        unset($this->tires, $this->archivedTires);
+    }
+
+    /**
+     * Restore an archived tire back into the collection.
+     */
+    public function unarchiveTire(int $tireId): void
+    {
+        auth()->user()->tires()
+            ->whereKey($tireId)
+            ->update(['archived_at' => null]);
+
+        unset($this->tires, $this->archivedTires);
     }
 }; ?>
 
@@ -136,6 +174,12 @@ new #[Title('My tires')] class extends Component
                                class="grid size-9 place-items-center rounded-lg text-michelin-gray transition hover:bg-michelin-blue/10 hover:text-michelin-blue" data-test="tire-detail-{{ $tire->id }}">
                                 <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" /></svg>
                             </a>
+                            @unless ($tire->is_active)
+                                <button type="button" wire:click="archiveTire({{ $tire->id }})" title="{{ __('Archive') }}"
+                                        class="grid size-9 place-items-center rounded-lg text-michelin-gray transition hover:bg-michelin-blue/10 hover:text-michelin-blue" data-test="tire-archive-{{ $tire->id }}">
+                                    <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5 19.625 17.5a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5m6.5 4h3.5M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" /></svg>
+                                </button>
+                            @endunless
                             <button type="button" wire:click="removeTire({{ $tire->id }})" title="{{ __('Remove') }}"
                                     class="grid size-9 place-items-center rounded-lg text-michelin-gray transition hover:bg-michelin-danger/10 hover:text-michelin-danger" data-test="tire-remove-{{ $tire->id }}">
                                 <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>
@@ -149,6 +193,38 @@ new #[Title('My tires')] class extends Component
                 <svg class="size-9 text-michelin-gray" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="3.2" /></svg>
                 <h2 class="text-base font-black text-michelin-blue-dark">{{ __('No tire registered yet') }}</h2>
                 <p class="text-sm text-michelin-gray">{{ __('Add your first tire below.') }}</p>
+            </div>
+        @endif
+
+        {{-- PNEUS ARCHIVÉS --}}
+        @if ($this->archivedTires->isNotEmpty())
+            <div class="flex flex-col gap-3">
+                <button type="button" wire:click="$toggle('showArchived')" class="flex items-center justify-between py-1" data-test="toggle-archived">
+                    <span class="rr-card__eyebrow">{{ __('Archived tires') }} ({{ $this->archivedTires->count() }})</span>
+                    <span class="text-xs font-bold uppercase tracking-wide text-michelin-blue">{{ $showArchived ? __('Hide') : __('Show') }}</span>
+                </button>
+
+                @if ($showArchived)
+                    @foreach ($this->archivedTires as $tire)
+                        @php $isFront = $tire->position === TirePosition::Front; @endphp
+                        <div class="rr-card flex items-center gap-4 opacity-75" wire:key="archived-{{ $tire->id }}" data-test="archived-row">
+                            <div class="flex min-w-0 flex-1 flex-col">
+                                <span class="truncate text-sm font-black text-michelin-blue-dark">{{ $tire->product->web_range_name }}</span>
+                                <span class="mt-1 flex flex-wrap items-center gap-2 text-[11px] font-bold text-michelin-gray">
+                                    <span class="rr-chip">{{ $isFront ? __('Front') : __('Rear') }}</span>
+                                    <span>{{ __('Archived') }} {{ $tire->archived_at?->translatedFormat('j M Y') }}</span>
+                                </span>
+                            </div>
+                            <div class="flex shrink-0 items-center gap-2">
+                                <button type="button" wire:click="unarchiveTire({{ $tire->id }})" class="rr-btn rr-btn--secondary rr-btn--sm" data-test="tire-unarchive-{{ $tire->id }}">{{ __('Restore') }}</button>
+                                <button type="button" wire:click="removeTire({{ $tire->id }})" title="{{ __('Remove') }}"
+                                        class="grid size-9 place-items-center rounded-lg text-michelin-gray transition hover:bg-michelin-danger/10 hover:text-michelin-danger" data-test="tire-remove-{{ $tire->id }}">
+                                    <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>
+                                </button>
+                            </div>
+                        </div>
+                    @endforeach
+                @endif
             </div>
         @endif
 
