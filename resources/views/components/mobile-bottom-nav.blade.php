@@ -17,7 +17,6 @@
 
 <nav
     class="rr-bottomnav fixed inset-x-0 bottom-0 z-30 lg:hidden"
-    style="padding-bottom: env(safe-area-inset-bottom);"
     aria-label="{{ __('Primary') }}"
     data-test="mobile-bottom-nav"
 >

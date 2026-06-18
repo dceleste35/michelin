@@ -148,7 +148,14 @@ select:focus[data-flux-control] {
     }
 
     /* ---- Navigation basse ---- */
-    .rr-bottomnav { display: flex; align-items: stretch; height: 64px; background: var(--color-michelin-blue); }
+    /* Zone de contenu de 64px + safe-area iOS EN DESSOUS (pas écrasée dans les 64px). */
+    .rr-bottomnav {
+        display: flex;
+        align-items: stretch;
+        min-height: calc(64px + env(safe-area-inset-bottom, 0px));
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+        background: var(--color-michelin-blue);
+    }
     .rr-bottomnav__item {
         position: relative;
         flex: 1;
