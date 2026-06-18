@@ -1,9 +1,17 @@
 <?php
 
 use App\Http\Controllers\StravaController;
+use App\Support\QrCode;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome')->name('home');
+
+// Porte QR à fournir au client : sur desktop un QR « scanne avec ton téléphone »,
+// sur mobile un accès direct à l'app. Le QR encode l'URL de l'app.
+Route::get('/qr', fn () => view('qr', [
+    'appUrl' => url('/'),
+    'qrSvg' => QrCode::svg(url('/')),
+]))->name('qr');
 
 // « Connect with Strava » — simulé pour le prototype (connecte le héros de démo, Marc).
 Route::get('auth/strava/connect', [StravaController::class, 'connect'])->name('strava.connect');

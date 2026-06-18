@@ -146,7 +146,6 @@ select:focus[data-flux-control] {
         padding: 0 16px;
         background: var(--color-michelin-blue);
     }
-    .rr-topbar__logo { height: 26px; width: auto; filter: brightness(0) invert(1); }
 
     /* ---- Navigation basse ---- */
     .rr-bottomnav { display: flex; align-items: stretch; height: 64px; background: var(--color-michelin-blue); }
