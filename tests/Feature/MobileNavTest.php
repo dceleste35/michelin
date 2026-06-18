@@ -19,6 +19,15 @@ it('does not show the app navigation to guests', function () {
     $this->get(route('login'))->assertDontSee('data-test="mobile-bottom-nav"', false);
 });
 
+it('paints the mobile status bar in Michelin blue via theme-color', function () {
+    $this->actingAs(User::factory()->create());
+
+    $this->get(route('activities'))
+        ->assertOk()
+        ->assertSee('<meta name="theme-color" content="#27509b" />', false)
+        ->assertSee('viewport-fit=cover', false);
+});
+
 it('uses a clean mobile top bar without the web hamburger', function () {
     $this->actingAs(User::factory()->create());
 
