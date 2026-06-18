@@ -32,6 +32,8 @@
                 </div>
 
                 <p class="text-sm font-semibold tracking-wide text-white/50">{{ $appUrl }}</p>
+
+                <a href="{{ route('home') }}" class="rr-btn rr-btn--secondary rr-btn--sm tracking-normal" data-test="continue-desktop">{{ __('Continue on this device') }}</a>
             </div>
 
             {{-- MOBILE : déjà sur téléphone, accès direct --}}

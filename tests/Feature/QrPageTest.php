@@ -7,7 +7,8 @@ it('serves the QR gate page at /qr', function () {
         ->assertOk()
         ->assertSee('data-test="qr-gate"', false)            // bloc QR desktop
         ->assertSee('An experience designed for mobile')
-        ->assertSee('Open the app');                          // accès direct mobile
+        ->assertSee('Open the app')                           // accès direct mobile
+        ->assertSee('Continue on this device');               // issue de secours desktop
 });
 
 it('keeps the landing app at / without the QR gate', function () {
