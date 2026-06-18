@@ -33,6 +33,11 @@ use Illuminate\Support\Carbon;
 class UserTire extends Model
 {
     /**
+     * Seuil d'usure (%) à partir duquel un pneu est considéré en fin de vie (à racheter).
+     */
+    public const END_OF_LIFE_WEAR = 80;
+
+    /**
      * Récupère les attributs qui doivent être castés.
      *
      * @return array<string, string>
@@ -95,5 +100,15 @@ class UserTire extends Model
     public function scopeArchived(Builder $query): void
     {
         $query->whereNotNull('archived_at');
+    }
+
+    /**
+     * Limite la requête aux pneus en fin de vie (usure ≥ seuil) — à racheter.
+     *
+     * @param  Builder<UserTire>  $query
+     */
+    public function scopeEndOfLife(Builder $query): void
+    {
+        $query->where('wear_percent', '>=', self::END_OF_LIFE_WEAR);
     }
 }
