@@ -25,4 +25,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::livewire('alerts', 'pages::alerts')->name('alerts');
 });
 
+Route::view('maquette', 'maquette')->name('demo');
+
 require __DIR__.'/settings.php';
