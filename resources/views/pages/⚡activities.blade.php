@@ -54,7 +54,7 @@ new #[Title('Activities')] class extends Component
     #[Computed]
     public function frontTires(): Collection
     {
-        return auth()->user()->tires()->with('product')->where('position', TirePosition::Front)->get();
+        return auth()->user()->tires()->notArchived()->with('product')->where('position', TirePosition::Front)->get();
     }
 
     /**
@@ -65,7 +65,7 @@ new #[Title('Activities')] class extends Component
     #[Computed]
     public function rearTires(): Collection
     {
-        return auth()->user()->tires()->with('product')->where('position', TirePosition::Rear)->get();
+        return auth()->user()->tires()->notArchived()->with('product')->where('position', TirePosition::Rear)->get();
     }
 
     /**

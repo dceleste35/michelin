@@ -90,6 +90,18 @@ it('derives a tire wear from the rides assigned to it', function () {
     expect((float) $tire->fresh()->wear_percent)->toBe(50.0);
 });
 
+it('excludes archived tires from the per-ride tire selectors', function () {
+    test()->seed(ProductCatalogSeeder::class);
+    $user = User::factory()->create();
+    $active = $user->tires()->create(['product_id' => Product::first()->id, 'position' => TirePosition::Front, 'is_active' => true]);
+    $archived = $user->tires()->create(['product_id' => Product::first()->id, 'position' => TirePosition::Front, 'is_active' => false, 'archived_at' => now()]);
+    $this->actingAs($user);
+
+    $ids = Livewire::test('pages::activities')->instance()->frontTires->pluck('id');
+
+    expect($ids)->toContain($active->id)->not->toContain($archived->id);
+});
+
 it('shows a verify-tires banner on activities and confirms all', function () {
     $user = User::factory()->create();
     StravaActivity::factory()->count(2)->for($user)->create(['tires_confirmed' => false]);
