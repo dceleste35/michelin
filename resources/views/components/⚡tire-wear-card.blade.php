@@ -288,8 +288,8 @@ new class extends Component {
         <div class="flex items-center justify-between gap-4">
             <div class="flex flex-col">
                 <span class="rr-card__eyebrow">{{ __('Kilométrage actuel') }}</span>
-                <span class="text-2xl font-black tracking-tight text-michelin-blue-dark tabular-nums">{{ number_format($this->getCurrentMileage(), 0, ',', ' ') }} <span class="text-xs font-semibold text-michelin-gray">km</span></span>
-                <span class="mt-1 text-[11px] font-bold uppercase tracking-wider text-michelin-gray">{{ __('Limite') }} : {{ number_format($this->userTire->product->expected_life_km ?? 5000, 0, ',', ' ') }} km</span>
+                <span class="text-2xl font-black tracking-tight text-michelin-blue-dark tabular-nums">{{ number_format($this->userTire->currentKm(), 0, ',', ' ') }} <span class="text-xs font-semibold text-michelin-gray">km</span></span>
+                <span class="mt-1 text-[11px] font-bold uppercase tracking-wider text-michelin-gray">{{ __('Limite') }} : {{ number_format($this->userTire->expectedLifeKm(), 0, ',', ' ') }} km</span>
             </div>
 
             <div class="relative flex shrink-0 items-center justify-center">

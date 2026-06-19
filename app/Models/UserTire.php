@@ -80,16 +80,32 @@ class UserTire extends Model
     }
 
     /**
-     * Recalcule et persiste l'usure (SCORE déterministe) : usure = (km de départ +
-     * km des sorties associées à ce pneu) / durée de vie du produit, bornée à 100 %.
+     * Durée de vie de référence du produit (km). Défaut 4000 si non renseignée.
+     * Source unique pour le calcul d'usure ET l'affichage (jauge, limite).
+     */
+    public function expectedLifeKm(): int
+    {
+        $this->loadMissing('product');
+
+        return (int) ($this->product?->expected_life_km ?: 4000);
+    }
+
+    /**
+     * Kilométrage réel du pneu = km de départ + km des sorties associées.
+     * (À ne pas dériver de l'usure arrondie : ce serait imprécis.)
+     */
+    public function currentKm(): float
+    {
+        return (float) $this->baseline_wear_km
+            + (float) StravaActivity::forUserTire($this)->sum('distance_m') / 1000;
+    }
+
+    /**
+     * Recalcule et persiste l'usure (SCORE déterministe) : usure = km réels / durée de vie, bornée à 100 %.
      */
     public function recomputeWear(): void
     {
-        $ridesKm = (float) StravaActivity::forUserTire($this)->sum('distance_m') / 1000;
-        $expectedLifeKm = (int) ($this->product?->expected_life_km ?: 4000);
-        $totalKm = (float) $this->baseline_wear_km + $ridesKm;
-
-        $this->wear_percent = round(min(100.0, $totalKm / $expectedLifeKm * 100), 1);
+        $this->wear_percent = round(min(100.0, $this->currentKm() / $this->expectedLifeKm() * 100), 1);
         $this->save();
     }
 
@@ -100,11 +116,9 @@ class UserTire extends Model
      */
     public function calibrateWearTo(float $targetPercent): void
     {
-        $this->loadMissing('product');
-        $expectedLifeKm = (int) ($this->product?->expected_life_km ?: 4000);
         $ridesKm = (float) StravaActivity::forUserTire($this)->sum('distance_m') / 1000;
 
-        $this->baseline_wear_km = max(0.0, $targetPercent / 100 * $expectedLifeKm - $ridesKm);
+        $this->baseline_wear_km = max(0.0, $targetPercent / 100 * $this->expectedLifeKm() - $ridesKm);
         $this->recomputeWear();
     }
 
