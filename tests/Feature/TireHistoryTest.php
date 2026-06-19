@@ -90,6 +90,19 @@ it('derives a tire wear from the rides assigned to it', function () {
     expect((float) $tire->fresh()->wear_percent)->toBe(50.0);
 });
 
+it('reports the real km on a tire (rides + baseline), not derived from rounded wear', function () {
+    $user = User::factory()->create();
+    $product = Product::create(['global_id' => 'CITY', 'web_range_name' => 'City Cargo']); // expected_life_km null
+    $tire = $user->tires()->create(['product_id' => $product->id, 'position' => TirePosition::Rear, 'is_active' => true, 'baseline_wear_km' => 0]);
+    StravaActivity::factory()->for($user)->create(['distance_m' => 120000, 'rear_tire_id' => $tire->id]);
+    $tire->recomputeWear();
+
+    // Une sortie de 120 km → 120 km réels (pas 150 = 3 % × 5000), durée de vie par défaut 4000.
+    expect((int) $tire->currentKm())->toBe(120)
+        ->and($tire->expectedLifeKm())->toBe(4000)
+        ->and((float) $tire->fresh()->wear_percent)->toBe(3.0);
+});
+
 it('excludes archived tires from the per-ride tire selectors', function () {
     test()->seed(ProductCatalogSeeder::class);
     $user = User::factory()->create();
